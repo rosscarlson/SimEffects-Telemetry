@@ -1,6 +1,6 @@
 namespace GtTelemetry.Core.Adapters;
 
-public enum MemorySourceKind { Pcsx2Pine, Rpcs3Pine, NativeProcess, HelperApp }
+public enum MemorySourceKind { Pcsx2Pine, Rpcs3Pine, Rpcs3Process, Azimuth }
 
 public enum Feature { MemoryAccess, Telemetry, CameraControl, DisplayPatches, PerCarProfiles }
 
@@ -30,7 +30,7 @@ public sealed class GameAdapter
 
     public required MemorySourceKind Source { get; init; }
 
-    /// <summary>Disc serials / title IDs this adapter recognizes (as reported by PINE).</summary>
+    /// <summary>Disc serials / title IDs this adapter recognizes (as reported by PINE or RPCS3), or the Azimuth game's id.</summary>
     public IReadOnlyList<string> GameIds { get; init; } = [];
 
     /// <summary>Folder under data/ holding the address map.</summary>
@@ -58,14 +58,13 @@ public sealed class GameAdapter
     {
         MemorySourceKind.Pcsx2Pine => "PCSX2 · PINE",
         MemorySourceKind.Rpcs3Pine => "RPCS3 · PINE",
-        MemorySourceKind.NativeProcess => "Native process",
-        MemorySourceKind.HelperApp => "Helper app",
+        MemorySourceKind.Rpcs3Process => "RPCS3 · process memory",
+        MemorySourceKind.Azimuth => "Azimuth · process memory",
         _ => k.ToString(),
     };
 }
 
-/// <summary>Every game the app knows about. Only GT4 Spec II is wired up in this milestone; the rest are declared so the UI and
-/// architecture account for them from day one.</summary>
+/// <summary>Every game the app knows about.</summary>
 public static class AdapterCatalog
 {
     public static readonly GameAdapter Gt4SpecII = new()
@@ -86,40 +85,62 @@ public static class AdapterCatalog
         ],
     };
 
-    public static readonly IReadOnlyList<GameAdapter> All =
-    [
-        Gt4SpecII,
-        new()
-        {
-            Id = "gt5", Name = "Gran Turismo 5", Platform = "PlayStation 3", Source = MemorySourceKind.Rpcs3Pine,
-            GameIds = ["BCUS98114", "BCES00569"],
-            Features = [new(Feature.MemoryAccess, Support.Planned, "RPCS3 PINE — milestone 6"), new(Feature.Telemetry, Support.Planned, "Milestone 6"),
-                        new(Feature.CameraControl, Support.Planned, "Milestone 6"), new(Feature.DisplayPatches, Support.Planned, "RPCS3 patches"),
-                        new(Feature.PerCarProfiles, Support.Planned, "")],
-        },
-        new()
-        {
-            Id = "gt6", Name = "Gran Turismo 6", Platform = "PlayStation 3", Source = MemorySourceKind.Rpcs3Pine,
-            GameIds = ["BCUS98394", "BCES01893"],
-            Features = [new(Feature.MemoryAccess, Support.Planned, "RPCS3 PINE — milestone 6"), new(Feature.Telemetry, Support.Planned, "Milestone 6"),
-                        new(Feature.CameraControl, Support.Planned, "Milestone 6"), new(Feature.DisplayPatches, Support.Planned, "RPCS3 patches"),
-                        new(Feature.PerCarProfiles, Support.Planned, "")],
-        },
-        new()
-        {
-            Id = "fh1-3", Name = "Forza Horizon 1–3", Platform = "Pinyon Shift recomp", Source = MemorySourceKind.NativeProcess,
-            Features = [new(Feature.MemoryAccess, Support.Planned, "Absorb existing work — milestone 6"), new(Feature.Telemetry, Support.Planned, "Existing telemetry"),
-                        new(Feature.CameraControl, Support.Unavailable, ""), new(Feature.DisplayPatches, Support.Unavailable, "Handled by the recomp"),
-                        new(Feature.PerCarProfiles, Support.Unavailable, "")],
-        },
-        new()
-        {
-            Id = "fm4", Name = "Forza Motorsport 4", Platform = "Xbox 360 · Azimuth helper", Source = MemorySourceKind.HelperApp,
-            Features = [new(Feature.MemoryAccess, Support.Planned, "Absorb existing helper app — milestone 6"), new(Feature.Telemetry, Support.Planned, "Existing telemetry"),
-                        new(Feature.CameraControl, Support.Unavailable, ""), new(Feature.DisplayPatches, Support.Unavailable, ""),
-                        new(Feature.PerCarProfiles, Support.Unavailable, "")],
-        },
-    ];
+    public static readonly GameAdapter Gt5 = new()
+    {
+        Id = "gt5",
+        Name = "Gran Turismo 5",
+        Platform = "PlayStation 3",
+        Source = MemorySourceKind.Rpcs3Process,
+        GameIds = ["BCUS98114", "BCES00569"],
+        DataFolder = "gt5",
+        Features =
+        [
+            new(Feature.MemoryAccess, Support.Available, "Read straight from RPCS3's memory; nothing to turn on in RPCS3"),
+            new(Feature.Telemetry, Support.Available, "Forza Data Out (Horizon or Dash format) over UDP, e.g. to SimHub"),
+            new(Feature.CameraControl, Support.Planned, ""),
+            new(Feature.DisplayPatches, Support.Planned, "RPCS3 patches"),
+        ],
+    };
+
+    public static readonly GameAdapter Gt6 = new()
+    {
+        Id = "gt6",
+        Name = "Gran Turismo 6",
+        Platform = "PlayStation 3",
+        Source = MemorySourceKind.Rpcs3Process,
+        GameIds = ["BCUS98296", "BCUS98394", "BCES01893"],
+        DataFolder = "gt6",
+        Features =
+        [
+            new(Feature.MemoryAccess, Support.Available, "Read straight from RPCS3's memory; nothing to turn on in RPCS3"),
+            new(Feature.Telemetry, Support.Available, "Forza Data Out (Horizon or Dash format) over UDP, e.g. to SimHub"),
+            new(Feature.CameraControl, Support.Planned, "Next"),
+            new(Feature.DisplayPatches, Support.Planned, "RPCS3 patches"),
+        ],
+    };
+
+    /// <summary>Forza Horizon 2 and 3 in the Azimuth emulator: one entry, since Azimuth Telemetry's engine reads both
+    /// and tells them apart itself. The ids are its GameDefinition ids.</summary>
+    public static readonly GameAdapter ForzaHorizon = new()
+    {
+        Id = "fh",
+        Name = "Forza Horizon 2 & 3",
+        Platform = "Xbox One",
+        Source = MemorySourceKind.Azimuth,
+        GameIds = ["fh2", "fh3"],
+        Features =
+        [
+            new(Feature.MemoryAccess, Support.Available, "Read straight from azimuth.exe; the game is recognised when it runs"),
+            new(Feature.Telemetry, Support.Available, "Forza Data Out (Horizon or Dash format) over UDP, e.g. to SimHub"),
+            new(Feature.CameraControl, Support.Available, "FOV in every driving view, and the seat in the in-car views"),
+            new(Feature.DisplayPatches, Support.Available, "Any render size, e.g. 10240 × 1440 for triple screens (Render Aspect Ratio)"),
+        ],
+    };
+
+    public static readonly IReadOnlyList<GameAdapter> All = [Gt4SpecII, Gt5, Gt6, ForzaHorizon];
+
+    /// <summary>The saved game, by id; "fh2" and "fh3" were separate entries before.</summary>
+    public static GameAdapter? ForId(string? id) => id is "fh2" or "fh3" ? ForzaHorizon : All.FirstOrDefault(a => a.Id == id);
 
     public static GameAdapter? ForGameId(string? id) => All.FirstOrDefault(a => a.Matches(id));
 }

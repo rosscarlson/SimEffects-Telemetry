@@ -1,0 +1,83 @@
+<UserControl x:Class="GtTelemetry.App.Views.ControlsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:azimuth="clr-namespace:GtTelemetry.App.Azimuth">
+    <UserControl.Resources>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Azimuth's wheel bindings (data\azimuth.ini), as in Azimuth Telemetry's Controls tab -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border x:Name="DiagramBox" CornerRadius="8" Background="{DynamicResource RoomBrush}" Padding="12,10" Margin="0,0,0,12"
+                ToolTip="Live: move the wheel and pedals, press the buttons, to see what's bound. Faint means not bound.">
+            <azimuth:WheelDiagram x:Name="Diagram"/>
+        </Border>
+        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+            <TextBlock x:Name="ControlsIntro" Style="{StaticResource SecondaryText}" FontSize="13" TextWrapping="Wrap"/>
+            <StackPanel x:Name="ControlsSettingsRow" Orientation="Horizontal" Margin="0,12,0,0">
+                <TextBlock Text="Rotation" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="RotationBox" Width="72" TextAlignment="Right" LostFocus="ControlsNumber_LostFocus"
+                         ToolTip="The wheel's full rotation, lock to lock, in degrees"/>
+                <TextBlock Text="degrees" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <TextBlock Text="Force feedback" Style="{StaticResource FieldLabel}" Margin="28,0,12,0"/>
+                <TextBox x:Name="ForceBox" Width="72" TextAlignment="Right" LostFocus="ControlsNumber_LostFocus"
+                         ToolTip="Azimuth's force feedback strength"/>
+                <TextBlock Text="%" Margin="6,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </StackPanel>
+        <Border x:Name="BindingBox" Grid.Row="2" CornerRadius="8" Background="{DynamicResource RoomBrush}" Padding="6">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl x:Name="BindingList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="10,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="Value" Grid.Column="1" Text="{Binding Display}" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" Margin="0,0,10,0" ToolTip="{Binding Value}"/>
+                                <Button Grid.Column="2" Content="Bind…" Padding="12,3" Tag="{Binding}" Click="Bind_Click"/>
+                                <Button Grid.Column="3" Content="Clear" Padding="10,3" Margin="6,0,0,0" Tag="{Binding}" Click="ClearBinding_Click"
+                                        IsEnabled="{Binding IsSet}"/>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsSet}" Value="False">
+                                    <Setter TargetName="Value" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsCapturing}" Value="True">
+                                    <Setter TargetName="Value" Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter TargetName="Value" Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+        <TextBlock x:Name="CaptureText" Grid.Row="3" Style="{StaticResource SecondaryText}" Margin="0,10,0,0" TextWrapping="Wrap"/>
+        <DockPanel x:Name="ControlsActions" Grid.Row="4" Margin="0,12,0,0">
+            <Button x:Name="SaveControlsButton" DockPanel.Dock="Right" Style="{StaticResource AccentButton}" MinWidth="136" MinHeight="42"
+                    Margin="12,0,0,0" Click="SaveControls_Click">
+                <TextBlock Text="Save to Azimuth" FontSize="15" FontWeight="SemiBold"/>
+            </Button>
+            <Button x:Name="ReloadControlsButton" DockPanel.Dock="Right" Content="Reload" VerticalAlignment="Center" Click="ReloadControls_Click"
+                    ToolTip="Read Azimuth's bindings again, dropping unsaved changes"/>
+            <TextBlock x:Name="ControlsStatus" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center"/>
+        </DockPanel>
+    </Grid>
+</UserControl>

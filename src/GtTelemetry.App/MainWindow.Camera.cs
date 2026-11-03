@@ -1,6 +1,9 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using GtTelemetry.App.Camera;
+using GtTelemetry.Core.Azimuth;
+using CameraAction = GtTelemetry.App.Camera.CameraAction;
 
 namespace GtTelemetry.App;
 
@@ -20,10 +23,16 @@ public sealed class CameraKeyRow(CameraAction action, string name) : Observable
     public string PadTip { get => padTip; set => Set(ref padTip, value); }
 }
 
-// The camera card: FOV and seat on keys or controller buttons, the overlay over the game, and rebinding.
+// The camera card: FOV and seat on keys or controller buttons, the overlay over the game, and rebinding. One set of
+// bindings for every game: GT4 goes through CameraController, the Azimuth games through Azimuth Telemetry's
+// CameraAdjuster.
 public partial class MainWindow
 {
     private CameraController? camera;
+    private CameraAdjuster? azimuthCamera;
+    private readonly CameraStatus azimuthCameraStatus = new();
+    private readonly DispatcherTimer azimuthCameraTick = new() { Interval = TimeSpan.FromMilliseconds(150) };
+    private bool azimuthFlash;
     private KeyboardHook? keyboard;
     private Joysticks? joysticks;
     private CameraOverlay? overlay;
@@ -42,26 +51,131 @@ public partial class MainWindow
         camera = new CameraController(state, Dispatcher);
         camera.Changed += (snap, flash) =>
         {
+            if (state.UsesAzimuth) return;
             CameraHeading.Text = snap.Heading;
             CameraHeading.Visibility = snap.Adjustable ? Visibility.Visible : Visibility.Collapsed;
             CameraDetail.Text = snap.Detail;
-            if (flash && keyboard?.Pcsx2Foreground() is { } game && game != IntPtr.Zero) overlay.Flash(snap.Heading, snap.Detail, game);
+            if (flash && keyboard?.GameForeground() is { } game && game != IntPtr.Zero) overlay.Flash(snap.Heading, snap.Detail, game);
             else if (overlay.IsVisible) overlay.Flash(snap.Heading, snap.Detail, IntPtr.Zero, restartTimer: false);
         };
         keyboard = new KeyboardHook((combo, shift) =>
         {
             if (!state.Settings.CameraEnabled || capturingKey != null || capturingPad != null || !keyBindings.TryGetValue(combo, out var action)) return false;
-            camera.Enqueue(action, shift);
+            DoCamera(action, shift);
             return true;
         });
         if (!keyboard.Installed) state.Status("Couldn't watch the keyboard, so the camera hotkeys won't work.", StatusKind.Error);
         joysticks = new Joysticks(Dispatcher);
         joysticks.Pressed += Joystick_Pressed;
+        azimuthCameraTick.Tick += (_, _) => RefreshAzimuthCamera();
         RefreshKeys();
+        CameraAdapterChanged();
+    }
+
+    /// <summary>Runs the Azimuth camera only while an Azimuth game is selected (it writes to the game's camera once
+    /// something is changed).</summary>
+    private void CameraAdapterChanged()
+    {
+        if (state.UsesAzimuth && azimuthCamera == null)
+        {
+            var settings = state.Settings;
+            // Keys are "<game>/<view>"; Azimuth Telemetry 0.4.0 saved the cockpit view under the game id alone.
+            azimuthCamera = new CameraAdjuster(key =>
+                settings.AzimuthCamera.TryGetValue(key, out var a) ? a
+                : key.EndsWith("/cockpit") && settings.AzimuthCamera.TryGetValue(key[..^"/cockpit".Length], out var old) ? old
+                : new CameraAdjust());
+            azimuthCamera.Changed += (key, a) => Dispatcher.BeginInvoke(() =>
+            {
+                if (a.IsZero) settings.AzimuthCamera.Remove(key);
+                else settings.AzimuthCamera[key] = a;
+                settings.Save();
+            });
+            azimuthCamera.Start();
+            azimuthCameraTick.Start();
+        }
+        else if (!state.UsesAzimuth && azimuthCamera != null)
+        {
+            azimuthCameraTick.Stop();
+            azimuthCamera.Dispose();
+            azimuthCamera = null;
+        }
+    }
+
+    /// <summary>A camera key or button: GT4's controller takes it with a bigger step for Shift; the Azimuth games step
+    /// 1 degree and 1 cm, five at a time with Shift.</summary>
+    private void DoCamera(CameraAction action, bool big)
+    {
+        if (azimuthCamera is not { } az)
+        {
+            camera?.Enqueue(action, big);
+            return;
+        }
+        var a = action switch
+        {
+            CameraAction.FovWider => Core.Azimuth.CameraAction.FovUp,
+            CameraAction.FovNarrower => Core.Azimuth.CameraAction.FovDown,
+            CameraAction.SeatForward => Core.Azimuth.CameraAction.SeatForward,
+            CameraAction.SeatBack => Core.Azimuth.CameraAction.SeatBack,
+            CameraAction.SeatUp => Core.Azimuth.CameraAction.SeatUp,
+            CameraAction.SeatDown => Core.Azimuth.CameraAction.SeatDown,
+            CameraAction.SeatLeft => Core.Azimuth.CameraAction.SeatLeft,
+            CameraAction.SeatRight => Core.Azimuth.CameraAction.SeatRight,
+            _ => Core.Azimuth.CameraAction.Reset,
+        };
+        int times = big && a != Core.Azimuth.CameraAction.Reset ? 5 : 1;
+        for (int i = 0; i < times; i++) az.Do(a);
+        azimuthFlash = true;
+        RefreshAzimuthCamera();
+    }
+
+    /// <summary>The card (and the overlay after a key) for the Azimuth games, worded as Azimuth Telemetry had it.</summary>
+    private void RefreshAzimuthCamera()
+    {
+        if (azimuthCamera == null) return;
+        azimuthCamera.Snapshot(azimuthCameraStatus);
+        var s = azimuthCameraStatus;
+        var a = s.Adjust;
+        string heading, detail;
+        bool adjustable = state.Settings.CameraEnabled && s.Game != null && s.View != null && s.GameFovDeg != null;
+        if (!state.Settings.CameraEnabled)
+        {
+            heading = "Camera";
+            detail = "Off.";
+        }
+        else if (!adjustable)
+        {
+            heading = "Camera";
+            detail = (s.Text.Length > 0 ? s.Text : "Waiting for the game.") + " Changes apply to the view you're driving in, each view its own.";
+        }
+        else
+        {
+            var view = s.View!;
+            float fov = s.GameFovDeg!.Value;
+            heading = $"{view.Name}: FOV {fov + a.FovDeg:0}°" + (a.FovDeg == 0 ? " (the game's own)" : $" (game {fov:0}°, {a.FovDeg:+0;−0}°)");
+            detail = (view.Seat == null ? "Seat keys work in the cockpit, dashboard, hood and bumper views"
+                : a.X == 0 && a.Y == 0 && a.Z == 0 ? "Seat: the game's own position" : "Seat: " + DescribeSeat(a)) + $" · {s.Game!.ShortName}";
+        }
+        CameraHeading.Text = heading;
+        CameraHeading.Visibility = adjustable ? Visibility.Visible : Visibility.Collapsed;
+        CameraDetail.Text = detail;
+        if (azimuthFlash && keyboard?.GameForeground() is { } game && game != IntPtr.Zero) overlay?.Flash(heading, detail, game);
+        else if (overlay?.IsVisible == true) overlay.Flash(heading, detail, IntPtr.Zero, restartTimer: false);
+        azimuthFlash = false;
+    }
+
+    private static string DescribeSeat(CameraAdjust a)
+    {
+        var parts = new List<string>();
+        if (a.Z != 0) parts.Add($"{Math.Abs(a.Z) * 100:0} cm {(a.Z > 0 ? "forward" : "back")}");
+        if (a.Y != 0) parts.Add($"{Math.Abs(a.Y) * 100:0} cm {(a.Y > 0 ? "up" : "down")}");
+        if (a.X != 0) parts.Add($"{Math.Abs(a.X) * 100:0} cm {(a.X > 0 ? "right" : "left")}");
+        return string.Join(", ", parts);
     }
 
     private void ShutdownCamera()
     {
+        azimuthCameraTick.Stop();
+        azimuthCamera?.Dispose();
         keyboard?.Dispose();
         joysticks?.Dispose();
         camera?.Dispose();
@@ -89,6 +203,8 @@ public partial class MainWindow
 
     private void Joystick_Pressed(PadButton button, bool repeat)
     {
+        if (ControlsView.Capturing) return;   // binding Azimuth's controls: buttons mean that
+        if (CaptureStartStopButton(button, repeat)) return;
         if (capturingPad is { } row)
         {
             if (repeat) return;
@@ -102,10 +218,11 @@ public partial class MainWindow
             state.Status($"{row.Name}: {joysticks!.NameOf(button.Device)}, button {button.Button}.", StatusKind.Info);
             return;
         }
+        if (StartStopButtonPressed(button, repeat)) return;
         if (!state.Settings.CameraEnabled || capturingKey != null || !padBindings.TryGetValue(button, out var action)) return;
         if (repeat && action == CameraAction.Reset) return;
-        if (keyboard?.Pcsx2Foreground() is not { } game || game == IntPtr.Zero) return;
-        camera?.Enqueue(action, KeyboardHook.ShiftDown());
+        if (keyboard?.GameForeground() is not { } game || game == IntPtr.Zero) return;
+        DoCamera(action, KeyboardHook.ShiftDown());
     }
 
     private void CameraEnabled_Changed(object sender, RoutedEventArgs e)
@@ -143,6 +260,7 @@ public partial class MainWindow
     /// Delete clears, for a waiting button too.</summary>
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (CaptureStartStopKey(e) || ControlsView.HandleKey(e)) return;
         if (capturingKey == null && capturingPad == null) return;
         e.Handled = true;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;

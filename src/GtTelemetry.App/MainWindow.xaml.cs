@@ -23,12 +23,14 @@ public partial class MainWindow : Window
     private string? pcsx2Data;
     private DisplayState? displayState;
     private readonly IAppView[] views;
+    private readonly bool developer;
 
     /// <param name="developer">Shows the address-finding tools (guided capture, scanner, watch list, memory, voice and
     /// address map). End users only need telemetry and the game profile.</param>
     public MainWindow(AppState state, bool developer = false)
     {
         this.state = state;
+        this.developer = developer;
         InitializeComponent();
         Height = Math.Min(Height, SystemParameters.WorkArea.Height - 40);
         Width = Math.Min(Width, SystemParameters.WorkArea.Width - 40);
@@ -36,6 +38,7 @@ public partial class MainWindow : Window
 
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         VersionText.Text = v == null ? "" : $"v{v.Major}.{v.Minor}.{v.Build}";
+        SetUpUpdates();
 
         var s = state.Settings;
         ThemeBox.SelectedIndex = (int)s.Theme;
@@ -50,14 +53,17 @@ public partial class MainWindow : Window
         RateSlider.Value = s.VoiceRate;
         RateText.Text = FormatRate(s.VoiceRate);
 
-        views = developer ? [TelemetryView, CaptureView, ScannerView, WatchView, MemoryView] : [TelemetryView];
+        views = developer ? [TelemetryView, ControlsView, CaptureView, ScannerView, WatchView, MemoryView] : [TelemetryView, ControlsView];
         if (!developer)
         {
-            NavBar.Visibility = VoiceCard.Visibility = MapCard.Visibility = FastBox.Visibility = FastNote.Visibility = Visibility.Collapsed;
+            VoiceCard.Visibility = MapCard.Visibility = FastBox.Visibility = FastNote.Visibility = Visibility.Collapsed;
+            foreach (var tab in new UIElement[] { TabCapture, TabScanner, TabWatch, TabMemory }) tab.Visibility = Visibility.Collapsed;
             foreach (var dev in new UIElement[] { CaptureView, ScannerView, WatchView, MemoryView }) dev.Visibility = Visibility.Collapsed;
         }
+        TelemetryView.AzimuthFolderChanged += ControlsView.FolderChanged;
         state.PropertyChanged += State_PropertyChanged;
         state.StatusChanged += ShowStatus;
+        TelemetryView.RunningChanged += UpdateStartButton;
         foreach (var view in views) view.Attach(state);
         SetUpCamera();
         RefreshAdapter();
@@ -72,15 +78,23 @@ public partial class MainWindow : Window
         };
     }
 
-    private void Window_SourceInitialized(object? sender, EventArgs e) => ThemeManager.ApplyTitleBar(this);
+    private void Window_SourceInitialized(object? sender, EventArgs e)
+    {
+        ThemeManager.ApplyTitleBar(this);
+        SetUpStartStop();
+    }
+
+    private void Window_Activated(object? sender, EventArgs e) => TelemetryView.RefreshScreens();
 
     private void Window_Closing(object? sender, CancelEventArgs e)
     {
         foreach (var view in views) view.Shutdown();
         ShutdownCamera();
+        ShutdownStartStop();
         state.SaveWatch();
         state.Settings.Save();
         state.Connection.Dispose();
+        state.Rpcs3.Dispose();
         state.Voice.Dispose();
     }
 
@@ -97,7 +111,7 @@ public partial class MainWindow : Window
     private void Tab_Checked(object sender, RoutedEventArgs e)
     {
         if (views == null) return;
-        var map = new Dictionary<object, IAppView> { [TabTelemetry] = TelemetryView, [TabCapture] = CaptureView, [TabScanner] = ScannerView, [TabWatch] = WatchView, [TabMemory] = MemoryView };
+        var map = new Dictionary<object, IAppView> { [TabTelemetry] = TelemetryView, [TabControls] = ControlsView, [TabCapture] = CaptureView, [TabScanner] = ScannerView, [TabWatch] = WatchView, [TabMemory] = MemoryView };
         foreach (var (tab, view) in map)
         {
             bool active = ReferenceEquals(tab, sender);
@@ -110,7 +124,7 @@ public partial class MainWindow : Window
     public void ShowPage(string name)
     {
         if (NavBar.Visibility != Visibility.Visible) return;
-        var tab = name.ToLowerInvariant() switch { "capture" => TabCapture, "scanner" => TabScanner, "watch" => TabWatch, "memory" => TabMemory, _ => TabTelemetry };
+        var tab = name.ToLowerInvariant() switch { "controls" => TabControls, "capture" => TabCapture, "scanner" => TabScanner, "watch" => TabWatch, "memory" => TabMemory, _ => TabTelemetry };
         tab.IsChecked = true;
     }
 
@@ -129,7 +143,7 @@ public partial class MainWindow : Window
     {
         HintText.Text = ActiveView.Hint;
         if (string.IsNullOrEmpty(StatusText.Text))
-            ShowStatus(state.IsConnected ? "Ready." : "Waiting for PCSX2…", StatusKind.Hint);
+            ShowStatus(state.IsConnected ? "Ready." : $"Waiting for {state.EmulatorName}…", StatusKind.Hint);
     }
 
     // ---- game / adapter ----
@@ -144,12 +158,25 @@ public partial class MainWindow : Window
     {
         var a = state.Adapter;
         if (!ReferenceEquals(AdapterBox.SelectedItem, a)) AdapterBox.SelectedItem = a;
-        AdapterInfo.Text = $"{a.Platform} · {GameAdapter.SourceName(a.Source)}" + (a.GameIds.Count > 0 ? $" · {string.Join(", ", a.GameIds)}" : "");
-        FeatureList.ItemsSource = a.Features.Select(f => new FeatureRow(
+        AdapterInfo.Text = $"{a.Platform} · {GameAdapter.SourceName(a.Source)}"
+            + (a.GameIds.Count > 0 && a.Source != MemorySourceKind.Azimuth ? $" · {string.Join(", ", a.GameIds)}" : "");
+        // Only what works, or what's planned; nothing that isn't coming.
+        FeatureList.ItemsSource = a.Features.Where(f => f.Support != Support.Unavailable).Select(f => new FeatureRow(
             GameAdapter.FeatureName(f.Feature),
             f.Support switch { Support.Available => "Available", Support.Planned => "Planned", _ => "Unavailable" },
             f.Support == Support.Available,
             string.IsNullOrEmpty(f.Note) ? f.Support.ToString() : f.Note)).ToList();
+        // The display card is hidden for games without display patches; the feature list above says what's planned.
+        // Azimuth's render size is on the Telemetry tab instead (Render Aspect Ratio).
+        ProfileCard.Visibility = a.SupportOf(Feature.DisplayPatches) == Support.Available && a.Source == MemorySourceKind.Pcsx2Pine ? Visibility.Visible : Visibility.Collapsed;
+        // The camera bindings are shared by every game, so the card stays; it's greyed out for games without camera control.
+        CameraCard.IsEnabled = a.SupportOf(Feature.CameraControl) == Support.Available;
+        CameraCard.Opacity = CameraCard.IsEnabled ? 1 : 0.5;
+        // The tab bar: Controls (Azimuth's wheel bindings) for the Azimuth games, the address tools in developer mode.
+        TabControls.Visibility = state.UsesAzimuth ? Visibility.Visible : Visibility.Collapsed;
+        NavBar.Visibility = developer || state.UsesAzimuth ? Visibility.Visible : Visibility.Collapsed;
+        if (!state.UsesAzimuth && TabControls.IsChecked == true) TabTelemetry.IsChecked = true;
+        if (camera != null) CameraAdapterChanged();
         foreach (var view in views) view.AdapterChanged();
         RefreshDisplay();
     }
@@ -283,11 +310,11 @@ public partial class MainWindow : Window
         ConnDot.Fill = (Brush)FindResource(connected ? "SuccessBrush" : "ControlBorderStrongBrush");
         ConnectButton.Content = state.Connecting ? "Connecting…" : connected ? "Disconnect" : "Connect";
         ConnectButton.IsEnabled = usable && !state.Connecting;
-        SlotBox.IsEnabled = FastBox.IsEnabled = usable;
+        SlotBox.IsEnabled = FastBox.IsEnabled = usable && !state.UsesRpcs3 && !state.UsesAzimuth;
         foreach (var view in views) view.ConnectionChanged();
         if (pcsx2Data == null && !initializing) RefreshDisplay();   // PCSX2 may have just started, so it can be found now
-        if (StatusText.Text is "Ready." or "Waiting for PCSX2…" or "")
-            ShowStatus(connected ? "Ready." : "Waiting for PCSX2…", StatusKind.Hint);
+        if (StatusText.Text is "Ready." or "Waiting for PCSX2…" or "Waiting for RPCS3…" or "Waiting for Azimuth…" or "")
+            ShowStatus(connected ? "Ready." : $"Waiting for {state.EmulatorName}…", StatusKind.Hint);
     }
 
     private async void ConnectButton_Click(object sender, RoutedEventArgs e)

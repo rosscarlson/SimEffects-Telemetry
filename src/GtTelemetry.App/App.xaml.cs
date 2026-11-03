@@ -7,6 +7,10 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
+        // This app may sit next to azimuth.exe, beside the Render Aspect Ratio shim's dinput8.dll; load Windows' own
+        // first so DirectInput uses that.
+        try { System.Runtime.InteropServices.NativeLibrary.Load(System.IO.Path.Combine(Environment.SystemDirectory, "dinput8.dll")); } catch { }
+
         base.OnStartup(e);
         DispatcherUnhandledException += (_, a) =>
         {

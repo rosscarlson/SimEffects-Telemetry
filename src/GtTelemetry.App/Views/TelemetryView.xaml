@@ -1,20 +1,31 @@
-<UserControl x:Class="GtTelemetry.App.Views.TelemetryView"
+﻿<UserControl x:Class="GtTelemetry.App.Views.TelemetryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
-        <Style x:Key="Tile" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource ControlBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="14,10"/>
-            <Setter Property="Margin" Value="0,0,12,12"/>
+        <!-- Label + 0-1 meter bar, for the pedals and steering -->
+        <Style x:Key="MeterTrack" TargetType="Border">
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBorderBrush}"/>
+            <Setter Property="ClipToBounds" Value="True"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-        <Style x:Key="TileLabel" TargetType="TextBlock" BasedOn="{StaticResource SecondaryText}">
-            <Setter Property="Margin" Value="0,0,0,4"/>
+        <Style x:Key="MeterFill" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="RenderTransformOrigin" Value="0,0.5"/>
         </Style>
-        <Style x:Key="TileValue" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="24"/>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style x:Key="BigValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="MidValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
     </UserControl.Resources>
@@ -25,23 +36,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title + primary action -->
-        <DockPanel>
-            <Button x:Name="StartButton" DockPanel.Dock="Right" Style="{StaticResource AccentButton}" MinWidth="136" MinHeight="42"
-                    VerticalAlignment="Top" Click="StartButton_Click">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="StartIcon" FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock x:Name="StartLabel" Text="Start streaming" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <StackPanel>
-                <TextBlock Text="Telemetry output" FontSize="18" FontWeight="SemiBold"/>
-                <TextBlock Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap"
-                           Text="Sends Forza Data Out packets over UDP. In SimHub, pick Forza Horizon 4 (Horizon format) or Forza Motorsport 7 (Dash) and set the same port."/>
-            </StackPanel>
-        </DockPanel>
+        <TextBlock Text="Telemetry output" FontSize="18" FontWeight="SemiBold"/>
 
-        <!-- Settings -->
+        <!-- Settings: one set for every game -->
         <WrapPanel Grid.Row="1" Margin="0,16,0,16" Orientation="Horizontal">
             <StackPanel Margin="0,0,16,8">
                 <TextBlock Text="Address" Margin="0,0,0,6"/>
@@ -64,6 +61,7 @@
                 <ComboBox x:Name="RateBox" Width="100" SelectionChanged="Setting_Changed">
                     <ComboBoxItem Content="30 Hz" Tag="30"/>
                     <ComboBoxItem Content="60 Hz" Tag="60"/>
+                    <ComboBoxItem Content="120 Hz" Tag="120"/>
                 </ComboBox>
             </StackPanel>
             <CheckBox x:Name="AutoStartBox" Content="Start streaming when the app opens" VerticalAlignment="Bottom" Margin="0,0,0,14"
@@ -71,37 +69,159 @@
         </WrapPanel>
 
         <!-- Live values -->
-        <Border Grid.Row="2" Background="{DynamicResource RoomBrush}" CornerRadius="8" Padding="16,16,4,4">
-            <StackPanel>
-                <DockPanel Margin="0,0,12,14">
+        <Border Grid.Row="2" Background="{DynamicResource RoomBrush}" CornerRadius="8" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DockPanel Margin="0,0,0,14">
                     <Ellipse x:Name="StateDot" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0"
                              Fill="{DynamicResource ControlBorderStrongBrush}"/>
-                    <TextBlock x:Name="StateText" FontWeight="SemiBold" Text="Not streaming"/>
-                    <TextBlock x:Name="RateText" Style="{StaticResource SecondaryText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="RateText" DockPanel.Dock="Right" Style="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="StateText" FontWeight="SemiBold" Text="Not streaming" TextTrimming="CharacterEllipsis"/>
                 </DockPanel>
-                <WrapPanel>
-                    <Border Style="{StaticResource Tile}" Width="150">
-                        <StackPanel><TextBlock Text="Speed" Style="{StaticResource TileLabel}"/><TextBlock x:Name="SpeedText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+
+                <UniformGrid Grid.Row="1" Columns="3">
+                    <StackPanel>
+                        <TextBlock Text="Gear" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="GearText" Text="–" Style="{StaticResource BigValue}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="RPM" Style="{StaticResource SecondaryText}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="RpmText" Text="–" Style="{StaticResource BigValue}"/>
+                            <TextBlock x:Name="RedlineText" Style="{StaticResource SecondaryText}" VerticalAlignment="Bottom" Margin="6,0,0,7"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Speed" Style="{StaticResource SecondaryText}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="SpeedText" Text="–" Style="{StaticResource BigValue}"/>
+                            <TextBlock x:Name="SpeedAltText" Style="{StaticResource SecondaryText}" VerticalAlignment="Bottom" Margin="6,0,0,7"/>
+                        </StackPanel>
+                    </StackPanel>
+                </UniformGrid>
+
+                <Grid Grid.Row="2" Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition Height="22"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Throttle" Style="{StaticResource FieldLabel}"/>
+                    <Border Grid.Column="1" Style="{StaticResource MeterTrack}">
+                        <Border Style="{StaticResource MeterFill}" Background="{DynamicResource SuccessBrush}">
+                            <Border.RenderTransform><ScaleTransform x:Name="ThrottleScale" ScaleX="0"/></Border.RenderTransform>
+                        </Border>
                     </Border>
-                    <Border Style="{StaticResource Tile}" Width="150">
-                        <StackPanel><TextBlock Text="RPM" Style="{StaticResource TileLabel}"/><TextBlock x:Name="RpmText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    <TextBlock Grid.Column="3" Text="Brake" Style="{StaticResource FieldLabel}"/>
+                    <Border Grid.Column="4" Style="{StaticResource MeterTrack}">
+                        <Border Style="{StaticResource MeterFill}" Background="{DynamicResource DangerBrush}">
+                            <Border.RenderTransform><ScaleTransform x:Name="BrakeScale" ScaleX="0"/></Border.RenderTransform>
+                        </Border>
                     </Border>
-                    <Border Style="{StaticResource Tile}" Width="100">
-                        <StackPanel><TextBlock Text="Gear" Style="{StaticResource TileLabel}"/><TextBlock x:Name="GearText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    <TextBlock Grid.Row="1" Text="Clutch" Style="{StaticResource FieldLabel}"/>
+                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource MeterTrack}">
+                        <Border Style="{StaticResource MeterFill}">
+                            <Border.RenderTransform><ScaleTransform x:Name="ClutchScale" ScaleX="0"/></Border.RenderTransform>
+                        </Border>
                     </Border>
-                    <Border Style="{StaticResource Tile}" Width="120">
-                        <StackPanel><TextBlock Text="Throttle" Style="{StaticResource TileLabel}"/><TextBlock x:Name="ThrottleText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="Handbrake" Style="{StaticResource FieldLabel}"/>
+                    <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource MeterTrack}">
+                        <Border Style="{StaticResource MeterFill}">
+                            <Border.RenderTransform><ScaleTransform x:Name="HandbrakeScale" ScaleX="0"/></Border.RenderTransform>
+                        </Border>
                     </Border>
-                    <Border Style="{StaticResource Tile}" Width="120">
-                        <StackPanel><TextBlock Text="Brake" Style="{StaticResource TileLabel}"/><TextBlock x:Name="BrakeText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    <TextBlock Grid.Row="2" Text="Steering" Style="{StaticResource FieldLabel}"/>
+                    <!-- Steering: fills from the centre, left or right -->
+                    <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Style="{StaticResource MeterTrack}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource MeterFill}" RenderTransformOrigin="1,0.5">
+                                <Border.RenderTransform><ScaleTransform x:Name="SteerLeftScale" ScaleX="0"/></Border.RenderTransform>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource MeterFill}">
+                                <Border.RenderTransform><ScaleTransform x:Name="SteerRightScale" ScaleX="0"/></Border.RenderTransform>
+                            </Border>
+                        </Grid>
                     </Border>
-                    <Border Style="{StaticResource Tile}" Width="150">
-                        <StackPanel><TextBlock Text="Lateral g" Style="{StaticResource TileLabel}"/><TextBlock x:Name="LatGText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource Tile}" Width="150">
-                        <StackPanel><TextBlock Text="Surface" Style="{StaticResource TileLabel}"/><TextBlock x:Name="SurfaceText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
-                    </Border>
-                </WrapPanel>
+                </Grid>
+
+                <UniformGrid Grid.Row="3" Columns="3" Margin="0,14,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Lateral g" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="LatGText" Text="–" Style="{StaticResource MidValue}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Surface" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="SurfaceText" Text="–" Style="{StaticResource MidValue}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Suspension" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="SuspensionText" Text="–" Style="{StaticResource MidValue}"
+                                   ToolTip="Front left, front right, rear left, rear right: 0 is fully extended, 100 fully compressed"/>
+                    </StackPanel>
+                </UniformGrid>
+
+                <!-- Azimuth: which car is read, and the engine's log -->
+                <DockPanel x:Name="CarRow" Grid.Row="4" Margin="0,14,0,8">
+                    <Button x:Name="RescanButton" DockPanel.Dock="Right" Margin="8,0,0,0" Padding="7,3" MinHeight="26"
+                            ToolTip="Look for cars again now" Click="Rescan_Click">
+                        <TextBlock Text="&#xE72C;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
+                    </Button>
+                    <Button x:Name="NextCarButton" DockPanel.Dock="Right" Content="Next car" MinHeight="26" Padding="10,2"
+                            ToolTip="If the readout isn't your car (RPM and gear don't match), step through the cars found" Click="NextCar_Click"/>
+                    <TextBlock x:Name="CarInfoText" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+                <Border x:Name="LogBox" Grid.Row="5" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardBorderBrush}" Padding="0,8,0,0">
+                    <ScrollViewer x:Name="LogScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl x:Name="LogList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Style="{StaticResource SecondaryText}" Margin="0,0,0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Render aspect ratio (the Azimuth-Span shim) -->
+        <Border x:Name="AspectSection" Grid.Row="3" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardBorderBrush}" Padding="0,12,0,0" Margin="0,14,0,0">
+            <StackPanel>
+                <TextBlock Text="Render Aspect Ratio" FontWeight="SemiBold"/>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock Text="Game Resolution:" Style="{StaticResource FieldLabel}" Margin="0,0,16,0"/>
+                    <TextBlock Text="Width" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="AspectWidthBox" Width="80" TextAlignment="Right"
+                             ToolTip="Total width in pixels, e.g. 10240 for 2560 + 5120 + 2560"/>
+                    <TextBlock Text="Height" Style="{StaticResource FieldLabel}" Margin="20,0,12,0"/>
+                    <TextBox x:Name="AspectHeightBox" Width="80" TextAlignment="Right"
+                             ToolTip="Height in pixels, e.g. 1440"/>
+                    <Button x:Name="SetAspectButton" Content="Set" MinWidth="72" Margin="16,0,0,0" Click="SetAspect_Click"/>
+                    <Button x:Name="ClearAspectButton" Content="Clear" MinWidth="72" Margin="8,0,0,0" Click="ClearAspect_Click"/>
+                </StackPanel>
+                <StackPanel x:Name="AzimuthFolderRow" Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBlock x:Name="AzimuthFolderText" Style="{StaticResource SecondaryText}" VerticalAlignment="Center"/>
+                    <Button Content="Browse…" Margin="10,0,0,0" Padding="10,3" Click="BrowseAzimuth_Click"/>
+                </StackPanel>
+                <TextBlock x:Name="ShimStatus" TextWrapping="Wrap" Margin="0,8,0,0"/>
             </StackPanel>
         </Border>
     </Grid>

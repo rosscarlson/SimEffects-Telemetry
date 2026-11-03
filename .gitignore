@@ -6,3 +6,8 @@ captures/
 publish/
 # Throwaway analysis scripts, RAM snapshots and screenshots from discovery sessions.
 tools/scratch/
+
+# Azimuth-Span build output (built by GtTelemetry.App.csproj)
+AzimuthSpan/build/
+AzimuthSpan/out/
+probes/

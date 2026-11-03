@@ -1,6 +1,7 @@
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using GtTelemetry.Core;
 using GtTelemetry.Core.Memory;
+using GtTelemetry.Core.Telemetry;
 using GtTelemetry.Core.Scanning;
 using GtTelemetry.Core.Sessions;
 using GtTelemetry.Core.Speech;
@@ -121,6 +122,8 @@ internal static class SelfTest
 
         failures += DisplayChecks();
         failures += CameraChecks();
+        failures += Ps3Checks(Ps3CarLayout.Gt6);
+        failures += Ps3Checks(Ps3CarLayout.Gt5);
 
         Console.WriteLine(failures == 0 ? "All checks passed." : $"{failures} check(s) failed.");
         return failures == 0 ? 0 : 1;
@@ -140,6 +143,93 @@ internal static class SelfTest
         public void Write(uint address, ReadOnlySpan<byte> data) => data.CopyTo(Ram.AsSpan((int)address));
         public void F(uint a, float v) => BinaryPrimitives.WriteSingleLittleEndian(Ram.AsSpan((int)a), v);
         public float F(uint a) => BinaryPrimitives.ReadSingleLittleEndian(Ram.AsSpan((int)a));
+    }
+
+    /// <summary>PS3 memory for the GT6 checks: one mapped, big-endian range.</summary>
+    private sealed class Ps3Ram(uint start, int size) : IMemorySource, IRegionSource
+    {
+        public readonly byte[] Ram = new byte[size];
+        public string Name => "test";
+        public bool IsConnected => true;
+        public void Connect() { }
+        public void Disconnect() { }
+        public void Dispose() { }
+        public void Read(uint address, Span<byte> dest) => Ram.AsSpan((int)(address - start), dest.Length).CopyTo(dest);
+        public void Write(uint address, ReadOnlySpan<byte> data) => data.CopyTo(Ram.AsSpan((int)(address - start)));
+        public IReadOnlyList<GuestRegion> Regions(uint from, uint to) => [new(start, (uint)size)];
+        public void F(uint a, float v) => BinaryPrimitives.WriteSingleBigEndian(Ram.AsSpan((int)(a - start)), v);
+        public void B(uint a, byte v) => Ram[a - start] = v;
+    }
+
+    /// <summary>GT5/GT6: a car block laid out like the ones mapped on 2026-11-03, found by search and read into a frame.</summary>
+    private static int Ps3Checks(Ps3CarLayout L)
+    {
+        const uint heap = 0x42000000, car = 0x42787400;
+        var m = new Ps3Ram(heap, 0x01000000);
+        void Car(uint c, float rpm)
+        {
+            void V(int o, float x, float y, float z) { m.F(c + (uint)o, x); m.F(c + (uint)o + 4, y); m.F(c + (uint)o + 8, z); }
+            V(L.AxisForward, 0, 1, 0);
+            V(L.AxisRight, 1, 0, 0);
+            V(L.AxisUp, 0, 0, 1);
+            V(L.AngularVelocity, 0.1f, 0.2f, 0.3f);
+            V(L.Velocity, 0, 20, 0);
+            V(L.Accel, 1, 2, 3);
+            m.F(c + (uint)L.Rpm, rpm);
+            m.F(c + (uint)L.Speed, 20);
+            m.B(c + (uint)L.Gear, 3);
+            m.F(c + (uint)L.Throttle, 0.6f);
+            m.F(c + (uint)L.Steer, 0.75f);
+            for (int i = 0; i < 4; i++)
+            {
+                int w = L.Wheel0 + i * L.WheelStride;
+                V(w + L.WheelMatrix, 1, 0, 0);
+                V(w + L.WheelMatrix + 12, 0, 1, 0);
+                V(w + L.WheelMatrix + 24, 0, 0, 1);
+                m.F(c + (uint)(w + L.WheelSuspension), 0.2f);
+            }
+            int fl = L.Wheel0, fr = fl + L.WheelStride;
+            m.B(c + (uint)(fl + L.WheelSurface), 1);
+            m.B(c + (uint)(fr + L.WheelSurface), 2);
+            m.F(c + (uint)(fl + L.WheelSlipRatio), -0.05f);
+            m.F(c + (uint)(fl + L.WheelSlipAngle), 0.075f);
+        }
+        // A decoy: unit axes without the wheels of a car.
+        m.F(0x42100000 + (uint)L.AxisForward, 1);
+        m.F(0x42100000 + (uint)L.AxisRight + 4, 1);
+        m.F(0x42100000 + (uint)L.AxisUp + 8, 1);
+        Car(car, 5000);
+
+        var t = new Ps3GtTelemetry(L, m, m);
+        var found = t.Search();
+        var f = t.Read();
+        var w = f.Wheels ?? new WheelState[4];
+        bool stillDriving = t.Read().Driving;
+        Thread.Sleep(250);
+        bool paused = !t.Read().Driving;
+        m.F(car + (uint)L.Rpm, 5100);
+        bool resumed = t.Read().Driving;
+        Car(0x42900000, 3000);
+        m.F(car + (uint)L.AxisUp, 5);   // the old block is gone
+        bool lost = !t.Read().Driving && t.Car == 0;
+        var again = new Ps3GtTelemetry(L, m, m).Search();
+
+        var checks = new (string What, bool Ok)[]
+        {
+            ("car found", found.Count == 1 && found[0] == car),
+            ("driving", f.Driving && stillDriving),
+            ("engine", f.Rpm == 5000 && f.Gear == 3 && f.SpeedMps == 20 && f.VelocityForwardMps == 20),
+            ("inputs", Math.Abs(f.Throttle - 0.6f) < 1e-6 && Math.Abs(f.Steer - 0.5f) < 1e-6 && f.Brake == 0),
+            ("rates", Math.Abs(f.PitchRate + 0.1f) < 1e-6 && Math.Abs(f.RollRate + 0.2f) < 1e-6 && Math.Abs(f.YawRate + 0.3f) < 1e-6),
+            ("accel", f.AccelForward == 1 && f.AccelRight == 2 && f.AccelUp == 3),
+            ("kerb", w[0].OnRumbleStrip && !w[1].OnRumbleStrip && w[1].SurfaceRumble > 0 && !w[2].OnRumbleStrip && w[2].SurfaceRumble == 0),
+            ("slip", Math.Abs(w[0].SlipRatio - 0.5f) < 1e-5 && Math.Abs(w[0].SlipAngle - 0.5f) < 1e-5),
+            ("paused", paused && resumed),
+            ("car lost", lost),
+            ("car moved", again.Count == 1 && again[0] == 0x42900000),
+        };
+        Console.WriteLine($"{L.Game.ToLowerInvariant(),-12}" + string.Join("  ", checks.Select(e => (e.Ok ? "ok " : "FAIL ") + e.What)));
+        return checks.Count(e => !e.Ok);
     }
 
     /// <summary>The camera on RAM laid out like Laguna Seca's: three table copies with cockpit and hood entries.</summary>

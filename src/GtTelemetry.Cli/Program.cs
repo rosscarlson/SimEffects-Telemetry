@@ -80,8 +80,9 @@ internal static class Program
               pointers <addr> [maxOffset]           Find pointers to (or just before) an address
               mark <name> <addr> <type> [candidate|confirmed|rejected] [notes...] [--units U] [--source S]
                                                     Save a named address to data/gt4-spec2/addresses.json
-              stream [--host H] [--port 8000] [--format horizon|dash] [--hz 60] [--for S]
-                                                    Send telemetry as Forza Data Out over UDP (SimHub)
+              stream [--game gt4|gt5|gt6] [--host H] [--port 8000] [--format horizon|dash] [--hz 60] [--for S]
+                                                    Send telemetry as Forza Data Out over UDP (SimHub);
+                                                    gt5 and gt6 read RPCS3's memory directly
               record <session> [--range 0xSTART-0xEND|car] [--hz 30] [--no-voice]
                                                     Record a region continuously while the session's steps are spoken
               camera                                Current camera view, seat copies and FOV (read only)
@@ -310,9 +311,27 @@ internal static class Program
             Hz: double.Parse(TakeOption(a, "--hz") ?? "60", CultureInfo.InvariantCulture));
         double? forSeconds = TakeOption(a, "--for") is string f ? double.Parse(f, CultureInfo.InvariantCulture) : null;
 
-        using var c = Connect();
-        if (!c.Pine.IsConnected) throw new MemorySourceException("Telemetry needs PINE. " + c.PineError);
-        var streamer = new TelemetryStreamer(new Gt4SpecIITelemetry(c), options);
+        string game = (TakeOption(a, "--game") ?? "gt4").ToLowerInvariant();
+        var layout = game switch { "gt5" => Ps3CarLayout.Gt5, "gt6" => Ps3CarLayout.Gt6, _ => null };
+        using var c = layout != null ? null : Connect();
+        using var rpcs3 = layout != null ? new Rpcs3ProcessMemory() : null;
+        ITelemetrySource source;
+        if (rpcs3 != null)
+        {
+            rpcs3.Connect();
+            var sw = Stopwatch.StartNew();
+            var gt6Source = new Ps3GtTelemetry(layout!, rpcs3, rpcs3);
+            gt6Source.Read();
+            var (title, id) = rpcs3.Game();
+            Console.WriteLine($"RPCS3 {title} [{id}]: {gt6Source.LastSearchCount} car block(s), using 0x{gt6Source.Car:X8}; search took {sw.ElapsedMilliseconds} ms");
+            source = gt6Source;
+        }
+        else
+        {
+            if (!c!.Pine.IsConnected) throw new MemorySourceException("Telemetry needs PINE. " + c.PineError);
+            source = new Gt4SpecIITelemetry(c);
+        }
+        var streamer = new TelemetryStreamer(source, options);
         var cts = forSeconds is double s ? new CancellationTokenSource(TimeSpan.FromSeconds(s)) : new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
 

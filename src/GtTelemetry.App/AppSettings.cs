@@ -1,7 +1,9 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GtTelemetry.App.Input;
 using GtTelemetry.App.Theming;
+using GtTelemetry.Core.Azimuth;
 
 namespace GtTelemetry.App;
 
@@ -75,6 +77,29 @@ public sealed class AppSettings
     /// <summary>Seat and FOV per car and view, keyed "adapter|game seat position".</summary>
     public Dictionary<string, CameraProfile> CameraProfiles { get; set; } = [];
 
+    /// <summary>FH2/FH3 camera changes per view, keyed "game/view" (Azimuth Telemetry's CameraAdjust).</summary>
+    public Dictionary<string, CameraAdjust> AzimuthCamera { get; set; } = [];
+
+    /// <summary>Starts and stops telemetry from anywhere: a key (system-wide) or a controller button
+    /// ("VID:PID|button"). Whichever was set last.</summary>
+    public HotkeyBinding StartStopKey { get; set; } = new();
+
+    public string? StartStopButton { get; set; }
+
+    /// <summary>Say "telemetry on/off" when the start/stop hotkey is used.</summary>
+    public bool AnnounceToggle { get; set; } = true;
+
+    /// <summary>Where azimuth.exe is, when this app isn't next to it.</summary>
+    public string? AzimuthFolder { get; set; }
+
+    /// <summary>Render Aspect Ratio size for Azimuth.</summary>
+    public int? AspectWidth { get; set; }
+
+    public int? AspectHeight { get; set; }
+
+    /// <summary>Azimuth Telemetry's settings were carried over (once).</summary>
+    public bool ImportedAzimuthTelemetry { get; set; }
+
     private static readonly JsonSerializerOptions Json = new()
     {
         WriteIndented = true,
@@ -95,14 +120,52 @@ public sealed class AppSettings
                 Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
                 File.Copy(LegacyFilePath, FilePath);
             }
-            if (File.Exists(FilePath))
-                return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath), Json) ?? new AppSettings();
+            var s = File.Exists(FilePath) ? JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath), Json) ?? new AppSettings() : new AppSettings();
+            s.StartStopKey ??= new HotkeyBinding();
+            s.AzimuthCamera ??= [];
+            if (!s.ImportedAzimuthTelemetry) s.ImportAzimuthTelemetry();
+            return s;
         }
         catch
         {
             // Corrupt or from a future version: fall back to defaults.
         }
         return new AppSettings();
+    }
+
+    /// <summary>The Forza Horizon games used to have their own app, Azimuth Telemetry. Carries its Azimuth folder,
+    /// render size, camera changes and start/stop hotkey over the first time. Its camera keys aren't: the camera card is
+    /// shared by every game now, and its defaults were on the number pad.</summary>
+    private void ImportAzimuthTelemetry()
+    {
+        ImportedAzimuthTelemetry = true;
+        string old = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AzimuthTelemetry", "settings.json");
+        if (!File.Exists(old)) return;
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(old));
+            var r = doc.RootElement;
+            string? Str(string name) => r.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+            int? Int(string name) => r.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number ? v.GetInt32() : null;
+            AzimuthFolder ??= Str("AzimuthFolder");
+            AspectWidth ??= Int("AspectWidth");
+            AspectHeight ??= Int("AspectHeight");
+            if (r.TryGetProperty("AnnounceToggle", out var say) && say.ValueKind == JsonValueKind.False) AnnounceToggle = false;
+            if (r.TryGetProperty("CameraAdjust", out var cam))
+                foreach (var e in cam.EnumerateObject())
+                    if (e.Value.Deserialize<CameraAdjust>(Json) is { IsZero: false } a) AzimuthCamera.TryAdd(e.Name, a);
+            if (r.TryGetProperty("Hotkey", out var hk) && hk.Deserialize<HotkeyBinding>(Json) is { } h && StartStopKey.Kind == HotkeyKind.None && StartStopButton == null)
+            {
+                if (h.Kind == HotkeyKind.Keyboard) StartStopKey = h;
+                // Azimuth Telemetry numbered buttons from 0; the camera card's PadButton counts from 1.
+                else if (h.Kind == HotkeyKind.Joystick) StartStopButton = $"{h.JoyVendor:X4}:{h.JoyProduct:X4}|{h.Button + 1}";
+            }
+        }
+        catch
+        {
+            // Nothing worth stopping for: the settings can be set again.
+        }
+        Save();
     }
 
     public void Save()

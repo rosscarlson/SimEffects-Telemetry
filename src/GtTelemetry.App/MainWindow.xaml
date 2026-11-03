@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource WindowBrush}" Foreground="{DynamicResource TextBrush}"
         FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13" UseLayoutRounding="True"
-        SourceInitialized="Window_SourceInitialized" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown">
+        SourceInitialized="Window_SourceInitialized" Closing="Window_Closing" Activated="Window_Activated" PreviewKeyDown="Window_PreviewKeyDown">
     <Grid Margin="20,16,20,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -34,14 +34,29 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- Left column: settings cards -->
-        <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <!-- Left column: settings cards, with Updates pinned at the bottom -->
+        <Grid Grid.Row="1" Grid.Column="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,10,0">
 
                 <!-- Game -->
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock Text="Game" Style="{StaticResource CardHeader}"/>
+                        <DockPanel Margin="0,0,0,10">
+                            <!-- Starts and stops telemetry (the Telemetry tab's output settings) -->
+                            <Button x:Name="StartButton" DockPanel.Dock="Right" Style="{StaticResource AccentButton}" MinWidth="84" MinHeight="28"
+                                    Padding="12,3" VerticalAlignment="Center" Click="StartButton_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="StartIcon" FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock x:Name="StartLabel" Text="Start" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Text="Game" Style="{StaticResource CardHeader}" Margin="0" VerticalAlignment="Center"/>
+                        </DockPanel>
                         <ComboBox x:Name="AdapterBox" DisplayMemberPath="Name" SelectionChanged="AdapterBox_SelectionChanged"/>
                         <TextBlock x:Name="AdapterInfo" Style="{StaticResource SecondaryText}" Margin="0,6,0,10"/>
                         <ItemsControl x:Name="FeatureList">
@@ -70,7 +85,7 @@
                 </Border>
 
                 <!-- Game profile -->
-                <Border Style="{StaticResource Card}">
+                <Border x:Name="ProfileCard" Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock x:Name="ProfileHeader" Text="Game profile" Style="{StaticResource CardHeader}"/>
                         <TextBlock Text="Display" Margin="0,0,0,6"/>
@@ -101,12 +116,31 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Camera: FOV and seat -->
+                <!-- Start/stop hotkey: every game -->
                 <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Start/stop hotkey" Style="{StaticResource CardHeader}"/>
+                        <Border Style="{StaticResource Pill}" CornerRadius="4" Padding="10,6" HorizontalAlignment="Stretch">
+                            <TextBlock x:Name="HotkeyText" Text="Not set" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                        </Border>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button x:Name="SetHotkeyButton" Content="Set…" MinWidth="72" Click="SetHotkey_Click"
+                                    ToolTip="Click, then press a key (with Ctrl, Alt or Shift if you like) or a wheel, button box or controller button. Esc cancels."/>
+                            <Button x:Name="ClearHotkeyButton" Content="Clear" Margin="8,0,0,0" Click="ClearHotkey_Click"/>
+                        </StackPanel>
+                        <TextBlock x:Name="HotkeyWarning" Style="{StaticResource SecondaryText}" Foreground="{DynamicResource ErrorTextBrush}"
+                                   Margin="0,8,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
+                        <CheckBox x:Name="AnnounceCheck" Content="Say “telemetry on/off” when it's used" Margin="0,12,0,0"
+                                  Checked="AnnounceCheck_Changed" Unchecked="AnnounceCheck_Changed"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Camera: FOV and seat -->
+                <Border x:Name="CameraCard" Style="{StaticResource Card}">
                     <StackPanel>
                         <TextBlock Text="Camera" Style="{StaticResource CardHeader}"/>
                         <CheckBox x:Name="CameraEnabledBox" Content="FOV and seat hotkeys" Checked="CameraEnabled_Changed" Unchecked="CameraEnabled_Changed"
-                                  ToolTip="The keys only do this while PCSX2 has focus; everywhere else they work as normal."/>
+                                  ToolTip="The keys only do this while the game (PCSX2 or Azimuth) has focus; everywhere else they work as normal."/>
                         <TextBlock x:Name="CameraHeading" FontWeight="SemiBold" Margin="0,10,0,0"/>
                         <TextBlock x:Name="CameraDetail" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
                         <ItemsControl x:Name="CameraKeyList" Margin="0,12,0,0">
@@ -232,6 +266,47 @@
             </StackPanel>
         </ScrollViewer>
 
+        <!-- Updates: this version, the newest release and installing it -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,4,10,0">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,10">
+                    <Button x:Name="UpdateButton" DockPanel.Dock="Right" Style="{StaticResource AccentButton}" MinHeight="28" Padding="12,3"
+                            Margin="8,0,0,0" Visibility="Collapsed" Click="UpdateButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE896;" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Update" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="CheckUpdatesButton" DockPanel.Dock="Right" Padding="7,3" MinHeight="26" ToolTip="Check for updates now"
+                            Click="CheckUpdates_Click">
+                        <TextBlock Text="&#xE72C;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
+                    </Button>
+                    <TextBlock Text="Updates" Style="{StaticResource CardHeader}" Margin="0" VerticalAlignment="Center"/>
+                </DockPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="This version" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="CurrentVersionText" Text="–" FontWeight="SemiBold" FontSize="15"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Latest" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="LatestVersionText" Text="–" FontWeight="SemiBold" FontSize="15"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Behind" Style="{StaticResource SecondaryText}"/>
+                        <TextBlock x:Name="BehindText" Text="–" FontWeight="SemiBold" FontSize="15"/>
+                    </StackPanel>
+                </Grid>
+                <TextBlock x:Name="UpdateStatus" Style="{StaticResource SecondaryText}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+        </Grid>
+
         <!-- Main card -->
         <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Card}" Margin="0">
             <Grid>
@@ -241,9 +316,10 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Tabs only show in developer mode (launch with the dev switch); end users just get telemetry. -->
+                <!-- Tabs: Controls for the Azimuth games; the rest only in developer mode (launch with the dev switch). -->
                 <StackPanel x:Name="NavBar" Orientation="Horizontal" Margin="0,0,0,14">
                     <RadioButton x:Name="TabTelemetry" Style="{StaticResource NavTab}" Content="Telemetry" GroupName="Nav" IsChecked="True" Checked="Tab_Checked"/>
+                    <RadioButton x:Name="TabControls" Style="{StaticResource NavTab}" Content="Controls" GroupName="Nav" Checked="Tab_Checked"/>
                     <RadioButton x:Name="TabCapture" Style="{StaticResource NavTab}" Content="Guided capture" GroupName="Nav" Checked="Tab_Checked"/>
                     <RadioButton x:Name="TabScanner" Style="{StaticResource NavTab}" Content="Scanner" GroupName="Nav" Checked="Tab_Checked"/>
                     <RadioButton x:Name="TabWatch" Style="{StaticResource NavTab}" Content="Watch list" GroupName="Nav" Checked="Tab_Checked"/>
@@ -252,6 +328,7 @@
 
                 <Grid Grid.Row="1">
                     <views:TelemetryView x:Name="TelemetryView"/>
+                    <views:ControlsView x:Name="ControlsView" Visibility="Collapsed"/>
                     <views:CaptureView x:Name="CaptureView" Visibility="Collapsed"/>
                     <views:ScannerView x:Name="ScannerView" Visibility="Collapsed"/>
                     <views:WatchView x:Name="WatchView" Visibility="Collapsed"/>

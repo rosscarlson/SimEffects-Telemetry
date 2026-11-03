@@ -171,3 +171,115 @@ unpaused in hood view
 remove 48:9 and 64:9 options in the Display drop down - then remove the text below it and the text at the bottom of "Camera". Also where we can set the bindings for each of the seat movements should also be able to be a joystick button, not just a keyboard key(s).
 
 continue
+
+I now have RPCS3 running with Gran Turismo 6 playing right now - FFB/bindings are working now we need to do what we did for GT4, let's start with telemetry and do it like last time, you tell me what to do when - remembering that curbs specifically are really difficult so we should do them where I run over one then pause the game and you look for the pause and read before it. I'm ready when you are, talk to me baby
+
+stopped and paused
+
+41mph in 2nd gear
+
+60 mph in 3rd gear (was braking to that speed as I overshot a bit)
+
+you want me to do them all in order and tell you when I"m done? I do NOT have a clutch pedal nor can I shift right now as the game is set to auto-shifting so I'll just have to get to whatever speed is needed for 4th gear.
+
+Tell me when to start
+
+okay, I sorta did step 2 twice as the first time I didn't see the note about turning the wheel, so I then did that but I was hitting a wall so not really moving - then I ended paused in 4th gear at 90mph
+
+okay did left curb pause, right curb pause, left curb pause, the grass pause
+
+continue
+
+continue
+
+continue
+
+okay drove around a bit and paused on a curb on the right wheels/side
+
+continue
+
+great, now let's move on to seating position and FOV, what do you need? Le'ts use the same bindings block for ALL games so don't store that under the "Game" block but in it's own block as all games will have those bindings - and if one doesn't support them we'll gray them out. I have the game paused but closed SET let me know what you need next
+
+Okay, I'm ready to start - tell me when you're recording
+
+paused in cockpit view now
+
+fully stopped, revs are around 3500 and I'm in cockpit view
+
+I'm on hood now and paused
+
+paused in cockpit view with the car stopped and foot on the brake
+
+running
+
+nope, I cycled back to the cockpit view and no change - if we can't make the seat move what about FOV, that's more important to me anyway but both would be nice, POV is the priority though
+
+the game crashed inside the emulator
+
+so for FOV are we patching RPCS3 (or is that the best method) or adding our own here? Seems the right aswer to to patch it, right? Don't code, just answer
+
+so then would SET have a button to apply that patch for the user? agian only answer, be brief
+
+but you'd be able to "install" it once and it would stick, right?
+
+and likelihood of success? BE BRIEF
+
+I have the game running, check the version only
+
+okay - let's table this for now and move on to data in GT5, I'm going to launch that so we can do the same detection process to find the telemetry as that's most important. Let me know when you're ready to start testing
+
+if you're recording now - stop - the game is still getting setup, I'll tell you when I'm ready for you to start watching
+
+great, in GT5 at Laguna Seca in a Lexus, paused doing 48mph in 2nd gear goin straight with my feet off the pedals, what next
+
+stopped with foot on brake 100% and paused
+
+70mph in 3rd gear and paused
+
+okay I did 1, 2, 3 then I drove a bit, braking and accelerating, then I paused twice on curbs on the right tires then ended paused on a curb on the left tires. When I was at half/full throttle with the wheel turned since I'm on a track I was hitting the wall and off track but I did drive with those inputs.
+
+Next
+
+Continue, but realize that I am now not at the computer. So if you need input from me you need to stop and wait for me to tell you that I've returned and then you can pick back up your work
+
+Continue, but realize that I am now not at the computer. So if you need input from me you need to stop and wait for me to tell you that I've returned and then you can pick back up your work
+
+Continue, but realize that I am now not at the computer. So if you need input from me you need to stop and wait for me to tell you that I've returned and then you can pick back up your work
+
+Continue, but realize that I am now not at the computer. So if you need input from me you need to stop and wait for me to tell you that I've returned and then you can pick back up your work
+
+COntinue - I'm at my computer but not in game - let me know what you need as we got cut off
+
+great - yup, seems to work - now what about 32:9? Look this one up too and make sure there isn't already a solution we can tap into
+
+can this help? [distrobox-gaming/docs/gt5-master-mod.md at master · akitaonrails/distrobox-gaming](https://github.com/akitaonrails/distrobox-gaming/blob/master/docs/gt5-master-mod.md)
+
+you say I'm on 1.04 - can you handle this and download/upgrade for me?
+
+closed
+
+1.05 installed but I had to interven
+
+[image 1]I found the attached, is this what we want? Enable Aspect Ratio I assume? What else?
+
+[image 1] I still can't get it to update - how do I use the files you gave me?
+
+[image 1] can you download those for me too? I'll install but you download (I'm going to move the other files you downloaed BTW)
+
+can you just let the download run and ignore it, not wasting time checking on it again as I see where it's going and can take care of it when it's done. If you CAN do that then proceed - if you must wait or tha'ts a problem stop and alert me.
+
+If you can continue:
+
+Here's a project that we're going to merge into this one so it's all in one app
+
+https://github.com/rosscarlson/Azimuth-Telemetry
+
+we created this specifically for the games that are in Azimuth launcher, which right now is FH2 and FH3 (with a specific version of Azimuth) - we need to pull in the code for the Forza games from here and put them in our wrapper. We then can remove Forza Motorsport 4 and FH1 as we built that into the launchers for the projects so it doesn't make sense to put those here. So when you bring this over it should look exactly the same as it does in AzimuthTelemetry including the wheel controls/bindings. Let's do add the same output and telemetry visuals we have now by merging the two interfaces.
+
+Let me know if you need anything or when you're ready.
+
+You can merge Forza Horizon 2 and 3 - they both use the exact same code and get rid of the "Start Azimuth" checkbox. Remove text "Sends Forza Data Out Packets....." then get rid of the "Probe drive" sectoin completely, that was for testing.  
+
+Let's move the "Start" button (and just say "Start" with the icon) in the upper right of the Game block that is in the upper left with it being a bit smaller to fit. Remove "Per-car profiles" from all but FM4, in fact only show what's planned for GT5 GT6 and remove the rest
+
+now we need to add an auto-update system, let's add a new block in the bottom left that handles that, showing the user when an udpate is avilable and giving them an "Update" button, showing what version they are, what's current and the number of releases behind they are. Let's call this version 0.2 and publish to github - that way once I install (give me an installer) I can test the updater when you push 0.3 - the installer should write to Program Files\SimEffect\Telemetry

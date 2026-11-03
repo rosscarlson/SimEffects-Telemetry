@@ -44,7 +44,9 @@ public sealed class CameraController : IDisposable
 
     public void Enqueue(CameraAction action, bool big) => actions.Enqueue((action, big));
 
-    private bool Enabled => state.Settings.CameraEnabled && state.Adapter.SupportOf(Feature.CameraControl) == Support.Available;
+    /// <summary>This runs GT4 in PCSX2; the Azimuth games have their own camera (CameraAdjuster).</summary>
+    private bool Enabled => state.Settings.CameraEnabled && state.Adapter.SupportOf(Feature.CameraControl) == Support.Available
+                            && state.Adapter.Source == MemorySourceKind.Pcsx2Pine;
 
     private async Task RunAsync(CancellationToken token)
     {
@@ -59,7 +61,9 @@ public sealed class CameraController : IDisposable
             if (!Enabled || !c.Pine.IsConnected)
             {
                 actions.Clear();
-                snap = new CameraSnapshot("Camera", !Enabled ? "Off." : "Waiting for PCSX2…", false);
+                snap = new CameraSnapshot("Camera",
+                    state.Adapter.SupportOf(Feature.CameraControl) != Support.Available ? $"Not available for {state.Adapter.Name} yet."
+                    : !Enabled ? "Off." : "Waiting for PCSX2…", false);
             }
             else
             {

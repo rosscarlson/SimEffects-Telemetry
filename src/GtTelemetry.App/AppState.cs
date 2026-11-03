@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using GtTelemetry.Core;
 using GtTelemetry.Core.Adapters;
 using GtTelemetry.Core.Addresses;
+using GtTelemetry.Core.Azimuth;
 using GtTelemetry.Core.Memory;
 using GtTelemetry.Core.Scanning;
 using GtTelemetry.Core.Speech;
@@ -84,7 +85,8 @@ public sealed class WatchItem : Observable, Views.ILiveRow
 }
 
 /// <summary>
-/// Everything the views share: settings, the PCSX2 connection, the voice, the watch list and the address map.
+/// Everything the views share: settings, the emulator connection (PCSX2 or RPCS3, by adapter), the voice, the watch
+/// list and the address map.
 /// Lives on the UI thread; memory I/O is pushed to the thread pool by callers.
 /// </summary>
 public sealed class AppState : Observable
@@ -94,13 +96,15 @@ public sealed class AppState : Observable
     private string connectionSummary = "Not connected";
     private string connectionDetail = "";
     private string? connectionError;
+    private string? rpcs3Error;
+    private AzimuthStatus azimuth = AzimuthStatus.NotRunning;
     private GameInfo? game;
     private GameAdapter adapter;
 
     public AppState(AppSettings settings)
     {
         Settings = settings;
-        adapter = AdapterCatalog.All.FirstOrDefault(a => a.Id == settings.AdapterId) ?? AdapterCatalog.Gt4SpecII;
+        adapter = AdapterCatalog.ForId(settings.AdapterId) ?? AdapterCatalog.Gt4SpecII;
         Connection = new Pcsx2Connection(settings.PineSlot, settings.FastSnapshots);
         Voice = new SpeechAnnouncer(settings.Voice, settings.VoiceRate) { Enabled = settings.SpeakInstructions };
         foreach (var w in settings.Watch)
@@ -119,6 +123,21 @@ public sealed class AppState : Observable
 
     public Pcsx2Connection Connection { get; private set; }
 
+    /// <summary>RPCS3's memory, for PS3 adapters.</summary>
+    public Rpcs3ProcessMemory Rpcs3 { get; } = new();
+
+    /// <summary>The selected game runs in RPCS3 rather than PCSX2.</summary>
+    public bool UsesRpcs3 => Adapter.Source == MemorySourceKind.Rpcs3Process;
+
+    /// <summary>The selected game runs in Azimuth (Forza Horizon 2 and 3). Its telemetry engine attaches by itself;
+    /// this only tracks whether azimuth.exe runs and which game.</summary>
+    public bool UsesAzimuth => Adapter.Source == MemorySourceKind.Azimuth;
+
+    /// <summary>azimuth.exe and its game, as of the last connection check.</summary>
+    public AzimuthStatus Azimuth { get => azimuth; private set => Set(ref azimuth, value); }
+
+    public string EmulatorName => UsesAzimuth ? "Azimuth" : UsesRpcs3 ? "RPCS3" : "PCSX2";
+
     public SpeechAnnouncer Voice { get; }
 
     public ObservableCollection<WatchItem> Watch { get; } = [];
@@ -136,13 +155,15 @@ public sealed class AppState : Observable
             Settings.AdapterId = value.Id;
             Settings.Save();
             LoadAddressBook();
+            Game = null;
+            UpdateConnectionText();
         }
     }
 
     /// <summary>The selected adapter can talk to a running game in this build.</summary>
     public bool AdapterUsable => Adapter.SupportOf(Feature.MemoryAccess) == Support.Available;
 
-    public bool IsConnected => Connection.IsConnected;
+    public bool IsConnected => UsesAzimuth ? Azimuth.Game != null : UsesRpcs3 ? Rpcs3.IsConnected : Connection.IsConnected;
 
     public bool Connecting { get => connecting; private set => Set(ref connecting, value); }
 
@@ -169,6 +190,17 @@ public sealed class AppState : Observable
         ConnectionSummary = "Connecting…";
         try
         {
+            if (UsesAzimuth)
+            {
+                Azimuth = await Task.Run(AzimuthStatus.Check);
+                return;
+            }
+            if (UsesRpcs3)
+            {
+                await Task.Run(TryConnectRpcs3);
+                RefreshRpcs3Game();
+                return;
+            }
             if (Connection.FastSnapshots != Settings.FastSnapshots || Connection.Pine.Slot != Settings.PineSlot)
             {
                 Connection.Dispose();
@@ -193,6 +225,7 @@ public sealed class AppState : Observable
         Settings.AutoConnect = false;
         Settings.Save();
         Connection.Disconnect();
+        Rpcs3.Disconnect();
         Game = null;
         UpdateConnectionText();
     }
@@ -200,7 +233,23 @@ public sealed class AppState : Observable
     /// <summary>Auto-connect, retry the missing half (PINE or process), and keep game info fresh.</summary>
     private async Task MaintainConnectionAsync()
     {
-        if (Connecting || !AdapterUsable) return;
+        if (Connecting) return;
+        var az = await Task.Run(AzimuthStatus.Check);
+        Azimuth = az;
+        if (SwitchEmulator(az) || !AdapterUsable) return;
+        if (UsesAzimuth)
+        {
+            UpdateConnectionText();
+            return;
+        }
+        if (UsesRpcs3)
+        {
+            if (Rpcs3.IsConnected) Rpcs3.CheckAlive();
+            if (Settings.AutoConnect && !Rpcs3.IsConnected) await Task.Run(TryConnectRpcs3);
+            RefreshRpcs3Game();
+            UpdateConnectionText();
+            return;
+        }
         bool wantPine = !Connection.Pine.IsConnected;
         bool wantProcess = Settings.FastSnapshots && !Connection.Process.IsConnected;
         if (Settings.AutoConnect && (wantPine || wantProcess))
@@ -216,6 +265,62 @@ public sealed class AppState : Observable
         UpdateConnectionText();
     }
 
+    private void TryConnectRpcs3()
+    {
+        try
+        {
+            Rpcs3.Connect();
+            rpcs3Error = null;
+        }
+        catch (MemorySourceException ex) { rpcs3Error = ex.Message; }
+    }
+
+    private void RefreshRpcs3Game()
+    {
+        var (title, id) = Rpcs3.IsConnected ? Rpcs3.Game() : (null, null);
+        Game = id == null ? null : new GameInfo(title, id, null, null, "RPCS3", EmulatorStatus.Running);
+    }
+
+    /// <summary>Follows the emulator that's running a known game: FH2 or FH3 in Azimuth, GT5 or GT6 in RPCS3, or
+    /// GT4 in PCSX2, when the selected game's emulator isn't running it. Returns true if the adapter changed.</summary>
+    private bool SwitchEmulator(AzimuthStatus az)
+    {
+        if (az.Game is { } fh && AdapterCatalog.ForGameId(fh.Id) is { } forza && forza != Adapter
+            && (UsesAzimuth || !IsConnected))
+        {
+            Adapter = forza;
+            return true;
+        }
+        if (UsesAzimuth)
+        {
+            if (az.Running) return false;
+            if (AdapterCatalog.ForGameId(Rpcs3ProcessMemory.RunningGameId()) is { } running && running.Source == MemorySourceKind.Rpcs3Process)
+            {
+                Adapter = running;
+                return true;
+            }
+            if (System.Diagnostics.Process.GetProcesses().Any(p => p.ProcessName.StartsWith("pcsx2", StringComparison.OrdinalIgnoreCase)))
+            {
+                Adapter = AdapterCatalog.Gt4SpecII;
+                return true;
+            }
+            return false;
+        }
+        if (!UsesRpcs3 && !Connection.Pine.IsConnected
+            && AdapterCatalog.ForGameId(Rpcs3ProcessMemory.RunningGameId()) is { } ps3 && ps3.Source == MemorySourceKind.Rpcs3Process)
+        {
+            Adapter = ps3;
+            return true;
+        }
+        if (UsesRpcs3 && !Rpcs3.IsConnected && Rpcs3ProcessMemory.RunningGameId() == null
+            && System.Diagnostics.Process.GetProcesses().Any(p => p.ProcessName.StartsWith("pcsx2", StringComparison.OrdinalIgnoreCase)))
+        {
+            Adapter = AdapterCatalog.Gt4SpecII;
+            return true;
+        }
+        return false;
+    }
+
     private async Task RefreshGameAsync()
     {
         var c = Connection;
@@ -226,6 +331,27 @@ public sealed class AppState : Observable
 
     private void UpdateConnectionText()
     {
+        if (UsesAzimuth)
+        {
+            var az = Azimuth;
+            ConnectionSummary = az.Game != null ? "Connected" : az.Running ? "Azimuth running" : "Not connected";
+            ConnectionDetail = !az.Running ? "azimuth.exe: not running"
+                : $"azimuth.exe: found (PID {az.Pid})" + (az.Game is { } fh ? $"\n{fh.Name} · {fh.BuildDescription}" : "");
+            ConnectionError = az.Game != null ? null : az.Running ? az.Why : "Start the game in Azimuth.";
+            Raise(nameof(IsConnected));
+            return;
+        }
+        if (UsesRpcs3)
+        {
+            bool on = Rpcs3.IsConnected;
+            ConnectionSummary = on ? "Connected" : "Not connected";
+            ConnectionDetail = on
+                ? $"RPCS3 process memory: attached (PID {Rpcs3.ProcessId})" + (Game is { } ps3 ? $"\n{ps3.Title} · {ps3.Id}" : "")
+                : "RPCS3 process memory: not attached";
+            ConnectionError = on || !Settings.AutoConnect ? null : rpcs3Error ?? "Start RPCS3 and the game.";
+            Raise(nameof(IsConnected));
+            return;
+        }
         var c = Connection;
         bool pine = c.Pine.IsConnected, proc = c.Process.IsConnected;
         ConnectionSummary = pine && proc ? "Connected" : pine ? "Connected (PINE only)" : proc ? "Connected (process memory only)" : "Not connected";

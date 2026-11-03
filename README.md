@@ -1,18 +1,39 @@
 # SimEffects Telemetry
 
-Real-time telemetry, ultrawide/triple-screen rendering and live FOV/seat adjustment for emulated Gran Turismo games.
-Phase 1 targets **Gran Turismo 4 Spec II** on **PCSX2**. GT5/GT6 (RPCS3) and the existing Forza work follow later.
-See [REQUESTS.md](REQUESTS.md) for the brief.
+Real-time telemetry, ultrawide/triple-screen rendering and live FOV/seat adjustment for emulated racing games:
+**Gran Turismo 4 Spec II** (PCSX2), **Gran Turismo 5 and 6** (RPCS3), and **Forza Horizon 2 and 3** (Azimuth). The game
+is picked up automatically from whichever emulator is running it. See [REQUESTS.md](REQUESTS.md) for the brief.
 
 ## Status
 
-For GT4 Spec II, all of these work today:
+| Game | Telemetry | Camera | Display |
+|---|---|---|---|
+| GT4 Spec II (PCSX2) | yes | FOV and seat | 16:9 to 32:9 (Game profile card) |
+| GT5, GT6 (RPCS3) | yes | not yet | not yet (RPCS3 patches) |
+| FH2, FH3 (Azimuth) | yes | FOV and seat | any render size (Render Aspect Ratio) |
+
+Shared by every game: the telemetry output settings and live readout, the start/stop hotkey (a key or a controller
+button, from anywhere), and one set of camera keys and buttons.
+
+For GT4 Spec II:
 
 | Feature | What it does |
 |---|---|
 | Telemetry | Forza Data Out over UDP (Horizon or Dash format) for SimHub: engine, pedals, gear, body motion, suspension, slip and kerbs. Pausing sends "not driving" |
 | Display modes | 16:9, 21:9 and 32:9 with the HUD rescaled, through PCSX2's per-game settings and cheat file (backed up first). 48:9 and 64:9 aren't offered any more, but keep working if already set |
 | Camera | Live FOV and seat position for the cockpit and hood views. Keys or controller buttons (wheel, button box, gamepad) work while PCSX2 has focus. Default keys are Ctrl+Alt+arrows, PgUp/PgDn, = and −, and Home to reset; hold Shift for bigger steps. A read-out shows over the game while adjusting, and settings are saved per car and view |
+
+For Forza Horizon 2 and 3 on Azimuth (merged in from Azimuth Telemetry, which it replaces):
+
+| Feature | What it does |
+|---|---|
+| Telemetry | Finds the player's car among AI and traffic by itself (**Next car** if it picks the wrong one) and sends RPM, speed, pedals, gear, wheel speeds, suspension and slip. Supports `forza_durango_release_final.exe` 1.0.0.64 (FH2) and FH3 1.0.125.0 on Azimuth 1.0.x |
+| Controls tab | Azimuth's racing wheel bindings, rotation and force feedback, with a live picture of the wheel, pedals, buttons and shifter. Saves to `data\azimuth.ini` with Azimuth closed (the original is kept as `azimuth.ini.before-azimuth-telemetry`) |
+| Camera | FOV in every driving view and the seat in the in-car views, each view its own, with the same camera keys as GT4. 1° and 1 cm a step, five with Shift. The only thing written to the game |
+| Render Aspect Ratio | Any render size, e.g. 10240 × 1440 for 64:9 triple screens, through a small `dinput8.dll` shim next to `azimuth.exe` (source in `AzimuthSpan/`, built with the VS 2022 C++ Build Tools). **Clear** removes it |
+
+How the Forza fields were found: [docs/azimuth/FINDINGS.md](docs/azimuth/FINDINGS.md). The first run carries Azimuth
+Telemetry's settings over (folder, render size, camera changes, start/stop hotkey).
 
 The address-finding tools are in the app with `--dev`, and in the CLI:
 
@@ -28,15 +49,32 @@ The address-finding tools are in the app with `--dev`, and in the CLI:
 ## Layout
 
 ```
-src/GtTelemetry.Core   game-agnostic core: memory sources (PINE, PCSX2 process), scanning, sessions, adapters, voice
+src/GtTelemetry.Core   game-agnostic core: memory sources (PINE, PCSX2 process, RPCS3), scanning, sessions, adapters,
+                       voice; Azimuth/ is the Forza Horizon engine, camera and probe from Azimuth Telemetry
 src/GtTelemetry.App    WPF app (SimEffectsTelemetry.exe), styled per ..\design.md
 src/GtTelemetry.Cli    gtt.exe, the terminal companion used during discovery
+src/GtTelemetry.Tests  xunit tests (the Forza packet, readers, car scanner and Azimuth controls)
+AzimuthSpan/           the Render Aspect Ratio shim (C), embedded in the app
 sessions/              guided capture scripts (JSON, editable without rebuilding)
 data/<game>/           address maps (addresses.json), the machine-readable source of truth
 docs/                  architecture, PINE notes, scanning method, per-game memory maps
 captures/              session results and raw snapshots (git-ignored)
-tools/                 icon generator, window screenshot helper
+installer/             Inno Setup script for the installer (built by tools/release.ps1)
+tools/                 icon generator, window screenshot helper, release script; tools/azimuth/ has the Forza probe analysis scripts
 ```
+
+## Installing and updates
+
+Download `SimEffectsTelemetry-Setup-X.Y.Z.exe` from [Releases](https://github.com/rosscarlson/SimEffects-Telemetry/releases)
+and run it; it installs to `C:\Program Files\SimEffects\Telemetry`. Settings live in `%APPDATA%\SimEffectsTelemetry`,
+so updating or reinstalling keeps them.
+
+The **Updates** card (bottom left) checks the releases when the app opens and every six hours. It shows this version,
+the latest one and how many releases behind you are; **Update** downloads the new installer, runs it and restarts the app.
+
+To release: bump `<Version>` in `src/GtTelemetry.App/GtTelemetry.App.csproj`, commit and push, then
+`powershell -File toolselease.ps1 -Publish -Notes "What changed"` (needs Inno Setup 6 and the `gh` CLI). That builds
+`publish\installer\SimEffectsTelemetry-Setup-X.Y.Z.exe` and makes the `vX.Y.Z` release with it attached.
 
 ## Running
 
@@ -53,6 +91,8 @@ gtt camera          # current camera view, seat and FOV
 gtt selftest        # synthetic checks of sessions, packets, display modes and the camera; no emulator needed
 ```
 
+`dotnet test` runs the Forza tests. Building the app needs the Visual Studio 2022 Build Tools (C++) for the shim.
+
 PCSX2's PINE serves one client at a time, so close the app before using `gtt` against the game.
 
 ## Docs
@@ -61,3 +101,5 @@ PCSX2's PINE serves one client at a time, so close the app before using `gtt` ag
 - [PINE protocol notes](docs/pine.md)
 - [How scanning and guided capture work](docs/scanning.md)
 - [GT4 Spec II memory map](docs/gt4-spec2/memory-map.md)
+- [Forza Horizon 2 and 3 findings](docs/azimuth/FINDINGS.md)
+- [Third-party notices](THIRD-PARTY-NOTICES.md) (the Forza packet encoder is ported from Pinyon Shift, BSD 3-Clause)

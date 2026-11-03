@@ -1,0 +1,381 @@
+  0 000 1412aee64 | sub rcx, 0x3a0 ; jmp 0x1412af230 ; sub rcx, 0x3a0 ; jmp 0x1412af330 ; int3 
+  1 008 14021dee0 | mov qword ptr [rdx], 0 ; mov rax, rdx ; ret 
+  2 010 140f17c22 | (14+ insns) jmp qword ptr [rip + 0xeb8f08] ; push rbx ; sub rsp, 0x20 ; cmp qword ptr [rip + 0x282192a], 0 ; jne 0x140f17c6e
+  3 018 140f17c22 | (14+ insns) jmp qword ptr [rip + 0xeb8f08] ; push rbx ; sub rsp, 0x20 ; cmp qword ptr [rip + 0x282192a], 0 ; jne 0x140f17c6e
+  4 020 14171e370 | or eax, 0xffffffff ; ret 
+  5 028 140a41740 | xor al, al ; ret 
+  6 030 1401db440 | ret 0 ; int3 
+  7 038 1412caf50 | mov eax, dword ptr [rcx - 0x228] ; ret 
+  8 040 1412cc000 | mov rax, qword ptr [rcx + 0x4ec8] ; ret 
+  9 048 1412c6fb0 | mov eax, dword ptr [rcx - 0x20] ; ret 
+ 10 050 1412dee00 | mov dword ptr [rcx - 0x20], edx ; ret 
+ 11 058 1412cdc50 | mov eax, dword ptr [rcx - 0x1c] ; ret 
+ 12 060 1412e3ce0 | mov dword ptr [rcx - 0x1c], edx ; ret 
+ 13 068 1412c6f70 | mov eax, dword ptr [rcx - 0x1bc] ; ret 
+ 14 070 1412dec00 | mov dword ptr [rcx - 0x1bc], edx ; ret 
+ 15 078 1401db430 | xor eax, eax ; ret 
+ 16 080 1401db440 | ret 0 ; int3 
+ 17 088 1412d3d20 | movzx eax, byte ptr [rcx - 0x17] ; ret 
+ 18 090 1412ddc60 | vmovups xmm0, xmmword ptr [rdx] ; vmovups xmmword ptr [rcx + 0x1190], xmm0 ; vmovsd xmm1, qword ptr [rdx + 0x10] ; vmovsd qword ptr [rcx + 0x11a0], xmm1 ; mov eax, dword ptr [rdx + 0x18] ; mov dword ptr [rcx + 0x11a8], eax ; ret 
+ 19 098 1412e3270 | movzx eax, dl ; mov dword ptr [rcx + 0xfc0], eax ; ret 
+ 20 0a0 1412e2890 | movzx eax, dl ; mov dword ptr [rcx + 0xfbc], eax ; ret 
+ 21 0a8 1412dd950 | movzx eax, dl ; mov dword ptr [rcx + 0xfc4], eax ; ret 
+ 22 0b0 1412e3670 | mov dword ptr [rcx + 0xab4], edx ; ret 
+ 23 0b8 1412e8be0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss dword ptr [rdx + rcx + 0x15e4], xmm2 ; ret 
+ 24 0c0 1412dd290 | (14+ insns) vmovss xmm3, dword ptr [rip + 0x1086338] ; vxorps xmm4, xmm4, xmm4 ; vsubss xmm0, xmm1, xmm3 ; vcomiss xmm0, xmm4 ; jb 0x1412dd2aa
+ 25 0c8 1412dd1b0 | vmovss dword ptr [rcx + 0x1a8], xmm1 ; ret 
+ 26 0d0 1417e1080 | vmovss xmm0, dword ptr [rcx + 0x1a8] ; ret 
+ 27 0d8 1412e07b0 | vmovups xmm0, xmmword ptr [rdx] ; vmovups xmmword ptr [rcx + 0xdc0], xmm0 ; movzx eax, byte ptr [rdx + 0x10] ; mov byte ptr [rcx + 0xdd0], al ; ret 
+ 28 0e0 1412dd1c0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; mov qword ptr [rsp + 0x18], rdi ; push r14 ; sub rsp, 0x20
+ 29 0e8 1412caee0 | (13+ insns) xor eax, eax ; add rcx, 0x1300 ; lea edx, [rax + 4] ; nop dword ptr [rax] ; cmp byte ptr [rcx + 0x250], 0
+ 30 0f0 1412c8200 | vmovss xmm0, dword ptr [rcx + 0x1c8] ; vmulss xmm0, xmm0, dword ptr [rip + 0xbfa06c] ; ret 
+ 31 0f8 1412c8040 | mov eax, dword ptr [rcx + 0xbb8] ; ret 
+ 32 100 1412ce580 | vmovss xmm0, dword ptr [rcx + 0x1ae8] ; vsubss xmm0, xmm0, dword ptr [rcx + 0x1f98] ; ret 
+ 33 108 1412cac80 | (14+ insns) push rbx ; sub rsp, 0x30 ; mov eax, dword ptr [rcx + 0xabc] ; vmovss xmm0, dword ptr [rcx + 0x5c8] ; vmovaps xmmword ptr [rsp + 0x20], xmm6
+ 34 110 1412cadc0 | lea rax, [rcx + 0xe2c] ; add rcx, 0x58 ; vmovss xmm1, dword ptr [rax] ; vcomiss xmm1, dword ptr [rcx] ; cmovb rcx, rax ; vmovss xmm0, dword ptr [rcx] ; ret 
+ 35 118 1412c5ef0 | vmovss xmm0, dword ptr [rcx - 0x224] ; ret 
+ 36 120 1412c92e0 | (14+ insns) mov rax, rsp ; push rbx ; push rsi ; push rdi ; sub rsp, 0xd0
+ 37 128 1412c9ff0 | (14+ insns) mov rax, rsp ; push rbx ; sub rsp, 0xe0 ; vmovaps xmmword ptr [rax - 0x18], xmm6 ; vmovaps xmmword ptr [rax - 0x28], xmm7
+ 38 130 1412c97f0 | (14+ insns) mov rax, rsp ; push rbx ; sub rsp, 0x4d0 ; vmovaps xmmword ptr [rax - 0x58], xmm10 ; vmovaps xmmword ptr [rax - 0x68], xmm11
+ 39 138 1412ca540 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 0x18], r8 ; push rbx ; push rbp ; push rsi
+ 40 140 1412c9f90 | (14+ insns) sub rsp, 0x58 ; vmovss xmm0, dword ptr [rip + 0x10995f0] ; vmovss xmm4, dword ptr [rsp + 0x90] ; mov rax, qword ptr [rsp + 0x80] ; mov byte ptr [rsp + 0x48], 0
+ 41 148 1412cade0 | (14+ insns) sub rsp, 0x58 ; vmovss xmm0, dword ptr [rip + 0x10987a0] ; vmovss xmm4, dword ptr [rsp + 0x90] ; mov rax, qword ptr [rsp + 0x80] ; mov byte ptr [rsp + 0x48], 1
+ 42 150 1412c62f0 | lea rax, [rcx + 0x1190] ; ret 
+ 43 158 1412cbef0 | lea rax, [rcx + 0xdf8] ; ret 
+ 44 160 1412cdb80 | xor eax, eax ; cmp dword ptr [rcx + 0xfc0], eax ; setne al ; ret 
+ 45 168 1412cd5f0 | xor eax, eax ; cmp dword ptr [rcx + 0xfbc], eax ; setne al ; ret 
+ 46 170 1412c5ca0 | xor eax, eax ; cmp dword ptr [rcx + 0xfc4], eax ; setne al ; ret 
+ 47 178 1412cdc30 | mov eax, dword ptr [rcx + 0xab4] ; ret 
+ 48 180 1412e85a0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15e4] ; ret 
+ 49 188 1412c5400 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; mov qword ptr [rsp + 0x18], rdi ; push r14 ; sub rsp, 0x20
+ 50 190 1412cd500 | mov eax, dword ptr [rcx + 0x11ac] ; ret 
+ 51 198 1412c71d0 | movzx eax, byte ptr [rcx + 0xaa0] ; ret 
+ 52 1a0 1412c81a0 | (14+ insns) vmovss xmm1, dword ptr [rcx + 0x1cc] ; vmovss xmm2, dword ptr [rcx + 0x148] ; vcomiss xmm2, xmm1 ; jbe 0x1412c81c2 ; vmovaps xmm0, xmm2
+ 53 1a8 1412caf10 | vmovaps xmm0, xmmword ptr [rcx - 0x1e0] ; vmovaps xmm1, xmmword ptr [rcx - 0x1d0] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; vmovaps xmmword ptr [rdx + 0x10], xmm1 ; ret 
+ 54 1b0 1412caf30 | vmovaps xmm0, xmmword ptr [rcx - 0x1e0] ; vmovaps xmmword ptr [rdx], xmm0 ; vmovaps xmm1, xmmword ptr [rcx - 0x1d0] ; vmovaps xmmword ptr [rdx + 0x10], xmm1 ; ret 
+ 55 1b8 1412c6390 | (13+ insns) vmovaps xmm0, xmmword ptr [rcx - 0x390] ; vmovaps xmmword ptr [rdx], xmm0 ; vmovaps xmm1, xmmword ptr [rcx - 0x350] ; vmovaps xmmword ptr [rdx + 0x10], xmm1 ; vmovaps xmm0, xmmword ptr [rcx - 0x340]
+ 56 1c0 1412e8ea0 | (11+ insns) sub rsp, 0x38 ; vmovaps xmm0, xmmword ptr [r8] ; mov rax, rdx ; lea r8, [rcx - 0x380] ; lea rdx, [rsp + 0x20]
+ 57 1c8 1412e8fa0 | sub rsp, 0x38 ; vmovaps xmm0, xmmword ptr [r8] ; mov rax, rdx ; lea r8, [rcx - 0x380] ; lea rdx, [rsp + 0x20] ; mov rcx, rax ; vmovaps xmmword ptr [rsp + 0x20], xmm0 ; call 0x14125c330 ; add rsp, 0x38 ; ret 
+ 58 1d0 1412c54f0 | vmovaps xmm0, xmmword ptr [rcx + 0xd10] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 59 1d8 1412c5cb0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1410] ; ret 
+ 60 1e0 1412e8270 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x30 ; mov rax, qword ptr [rcx] ; vmovaps xmmword ptr [rsp + 0x20], xmm6
+ 61 1e8 1412b47b0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x50 ; vmovaps xmmword ptr [rsp + 0x40], xmm6 ; vmovss xmm6, dword ptr [rcx + 0x148]
+ 62 1f0 1412b48a0 | (14+ insns) mov rax, rsp ; push rbx ; sub rsp, 0xb0 ; vmovaps xmm0, xmmword ptr [rcx - 0x350] ; vmovaps xmmword ptr [rax - 0x18], xmm6
+ 63 1f8 1412c73b0 | (14+ insns) sub rsp, 0x48 ; vmovss xmm3, dword ptr [rip + 0x109c1d0] ; mov qword ptr [rsp + 0x40], rbx ; vmovaps xmmword ptr [rsp + 0x30], xmm6 ; mov rbx, rcx
+ 64 200 1412c7de0 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0x150] ; vmovss xmm1, dword ptr [rip + 0x109b79c] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+ 65 208 1412c7e60 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0xba8] ; vmovss xmm1, dword ptr [rip + 0x109b71c] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+ 66 210 1412c7da0 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0xbb0] ; vmovss xmm1, dword ptr [rip + 0x109b7dc] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+ 67 218 1412e8730 | (13+ insns) vmovss xmm1, dword ptr [rip + 0x107ae54] ; movsxd rax, edx ; vxorps xmm2, xmm2, xmm2 ; imul rdx, rax, 0x4b0 ; vmovss xmm3, dword ptr [rdx + rcx + 0x1358]
+ 68 220 1412e87d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1200] ; ret 
+ 69 228 1412c2580 | vmovss xmm0, dword ptr [rcx + 0x17c] ; vdivss xmm0, xmm0, dword ptr [rcx + 0xa80] ; ret 
+ 70 230 1412d8430 | add rcx, -0x3a0 ; jmp 0x1412d11e0 ; int3 
+ 71 238 1412da500 | add rcx, -0x3a0 ; jmp 0x1412da510 ; int3 
+ 72 240 1412d9810 | (14+ insns) push rbp ; push rbx ; push rsi ; push r13 ; lea rbp, [rsp - 0x270f8]
+ 73 248 1412d6400 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x40 ; vmovaps xmm0, xmmword ptr [rcx - 0x350] ; vmovaps xmmword ptr [rsp + 0x30], xmm6
+ 74 250 1412d63c0 | (14+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0x248]
+ 75 258 1412ddc90 | mov qword ptr [rcx + 0x4ec8], rdx ; ret 
+ 76 260 1412cc000 | mov rax, qword ptr [rcx + 0x4ec8] ; ret 
+ 77 268 1412e2840 | mov byte ptr [rcx + 0x4edd], dl ; ret 
+ 78 270 1412cd150 | vmovaps xmm0, xmmword ptr [rcx - 0x390] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 79 278 1412cd160 | push rbx ; sub rsp, 0x20 ; add rcx, -0x3a0 ; mov rbx, rdx ; call 0x1412cd180 ; mov rax, rbx ; add rsp, 0x20 ; pop rbx ; ret 
+ 80 280 1412e27d0 | vmovaps xmm0, xmmword ptr [rdx] ; vmovaps xmmword ptr [rcx - 0x390], xmm0 ; ret 
+ 81 288 1412cdcf0 | vmovaps xmm0, xmmword ptr [rcx - 0x350] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 82 290 1412e3cf0 | vmovaps xmm0, xmmword ptr [rdx] ; vmovaps xmmword ptr [rcx - 0x350], xmm0 ; vdpps xmm0, xmm0, xmm0, 0x7f ; vsqrtps xmm1, xmm0 ; vmovss dword ptr [rcx + 0xe28], xmm1 ; ret 
+ 83 298 1412cd2d0 | vmovaps xmm0, xmmword ptr [rcx + 0xd40] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 84 2a0 1412cd5e0 | vmovss xmm0, dword ptr [rcx + 0xe28] ; ret 
+ 85 2a8 1412c5b10 | vmovaps xmm0, xmmword ptr [rcx + 0xd20] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 86 2b0 1412c5b20 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x60 ; mov rbx, qword ptr [rcx + 0xbc0]
+ 87 2b8 1412c5c90 | vmovaps xmm0, xmmword ptr [rcx - 0x340] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 88 2c0 1412dd910 | sub rsp, 0x38 ; vmovaps xmm0, xmmword ptr [rdx] ; lea rdx, [rcx - 0x320] ; lea r8, [rsp + 0x20] ; vmovaps xmmword ptr [rcx - 0x340], xmm0 ; add rcx, -0x330 ; vmovaps xmmword ptr [rsp + 0x20], xmm0 ; call 0x141257880 ; add rsp, 0x38 ; ret 
+ 89 2c8 1412c5c80 | vmovaps xmm0, xmmword ptr [rcx - 0x330] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+ 90 2d0 1412dd8d0 | sub rsp, 0x38 ; vmovaps xmm0, xmmword ptr [rdx] ; lea rdx, [rcx - 0x2f0] ; lea r8, [rsp + 0x20] ; vmovaps xmmword ptr [rcx - 0x330], xmm0 ; add rcx, -0x340 ; vmovaps xmmword ptr [rsp + 0x20], xmm0 ; call 0x141257880 ; add rsp, 0x38 ; ret 
+ 91 2d8 1412c6e40 | sub rcx, 0x3a0 ; jmp 0x1412c6dd0 ; int3 
+ 92 2e0 1412cbeb0 | mov rax, rdx ; lea rdx, [rcx - 0x380] ; mov rcx, rax ; jmp 0x141257690 ; int3 
+ 93 2e8 1412e2590 | (14+ insns) push rbx ; sub rsp, 0x20 ; mov rbx, rcx ; add rcx, -0x380 ; call 0x141257690
+ 94 2f0 1412d6970 | add rcx, -0x380 ; jmp 0x1412587b0 ; int3 
+ 95 2f8 1412c92d0 | vmovss xmm0, dword ptr [rcx - 0x2b0] ; ret 
+ 96 300 1412c8d70 | vmovss xmm0, dword ptr [rcx - 0x2ac] ; ret 
+ 97 308 1412c8d50 | mov rax, rdx ; lea rdx, [rcx - 0x270] ; mov rcx, rax ; jmp 0x141257690 ; int3 
+ 98 310 1412ce5c0 | vmovaps xmm0, xmmword ptr [rcx + 0xeb0] ; vmovaps xmm1, xmmword ptr [rcx + 0xec0] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; vmovaps xmm0, xmmword ptr [rcx + 0xed0] ; vmovaps xmmword ptr [rdx + 0x10], xmm1 ; vmovaps xmm1, xmmword ptr [rcx + 0xee0] ; vmovaps xmmword ptr [rdx + 0x20], xmm0 ; vmovaps xmmword ptr [rdx + 0x30], xmm1 ; ret 
+ 99 318 1412c8050 | (14+ insns) vmovss xmm1, dword ptr [rcx + 0x1cc] ; vmovss xmm2, dword ptr [rcx + 0x148] ; vcomiss xmm2, xmm1 ; jbe 0x1412c8072 ; vmovaps xmm0, xmm2
+100 320 1412e0a40 | vmovss dword ptr [rcx + 0x148], xmm1 ; ret 
+101 328 14180ce30 | vmovss xmm0, dword ptr [rcx + 0x1c8] ; ret 
+102 330 1412c8100 | vmovss xmm0, dword ptr [rcx + 0x1cc] ; ret 
+103 338 1412c8120 | vmovss xmm0, dword ptr [rcx + 0x1cc] ; vmulss xmm0, xmm0, dword ptr [rip + 0xbfa14c] ; ret 
+104 340 1412c80e0 | vmovss xmm0, dword ptr [rcx + 0x5c0] ; vmulss xmm0, xmm0, dword ptr [rip + 0xbfa18c] ; ret 
+105 348 1412c8150 | (14+ insns) vmovss xmm2, dword ptr [rcx + 0x5c0] ; vmovss xmm0, dword ptr [rcx + 0x148] ; vmovss xmm1, dword ptr [rcx + 0x1cc] ; vmovss xmm4, dword ptr [rip + 0x109b41c] ; vsubss xmm3, xmm0, xmm2
+106 350 1412c25a0 | vmovss xmm0, dword ptr [rcx + 0x17c] ; ret 
+107 358 1412c2600 | (14+ insns) vmovss xmm2, dword ptr [rcx + 0xa88] ; vxorps xmm3, xmm3, xmm3 ; vcomiss xmm2, xmm3 ; vmovaps xmm4, xmm3 ; jae 0x1412c261e
+108 360 1412c25d0 | vmovss xmm0, dword ptr [rcx + 0xa88] ; ret 
+109 368 1412c25b0 | vmovss xmm0, dword ptr [rcx + 0x17c] ; vdivss xmm0, xmm0, dword ptr [rcx + 0xa88] ; ret 
+110 370 1412c25f0 | xor eax, eax ; cmp dword ptr [rcx + 0x188], eax ; setne al ; ret 
+111 378 1412d67f0 | xor eax, eax ; cmp dword ptr [rcx + 0xa0c], eax ; setne al ; ret 
+112 380 1412d67d0 | xor eax, eax ; cmp dword ptr [rcx + 0x158], eax ; setne al ; ret 
+113 388 1412d67e0 | xor eax, eax ; cmp dword ptr [rcx + 0x15c], eax ; setne al ; ret 
+114 390 1407a3f30 | vmovss xmm0, dword ptr [rcx + 0x160] ; ret 
+115 398 1412d6800 | (14+ insns) cmp dword ptr [rcx + 0xa0c], 0 ; je 0x1412d6842 ; vmovss xmm1, dword ptr [rcx + 0xa20] ; vsubss xmm0, xmm1, dword ptr [rcx + 0x160] ; vdivss xmm3, xmm0, xmm1
+116 3a0 1412c80d0 | vmovss xmm0, dword ptr [rcx + 0x18c] ; ret 
+117 3a8 1412c80a0 | vmovss xmm0, dword ptr [rcx + 0x19c] ; ret 
+118 3b0 1412c71e0 | (14+ insns) cmp dword ptr [rcx + 0xa24], 0 ; je 0x1412c7262 ; vmovss xmm3, dword ptr [rcx + 0x170] ; vmovss xmm2, dword ptr [rip + 0xb518c3] ; vcomiss xmm3, xmm2
+119 3b8 1412cbf00 | (14+ insns) cmp dword ptr [rcx + 0xa24], 0 ; je 0x1412cbf82 ; vmovss xmm3, dword ptr [rcx + 0xa40] ; vmovss xmm2, dword ptr [rip + 0xb4cba3] ; vcomiss xmm3, xmm2
+120 3c0 140f64480 | vxorps xmm0, xmm0, xmm0 ; ret 
+121 3c8 1412c8140 | vmovss xmm0, dword ptr [rcx + 0x5ec] ; ret 
+122 3d0 1412c8110 | vmovss xmm0, dword ptr [rcx + 0x5e4] ; ret 
+123 3d8 1412c80c0 | vmovss xmm0, dword ptr [rcx + 0x198] ; ret 
+124 3e0 1412c80b0 | vmovss xmm0, dword ptr [rcx + 0x194] ; ret 
+125 3e8 1412c25e0 | cmp dword ptr [rcx + 0x1b0], 1 ; sete al ; ret 
+126 3f0 1412c3720 | vmovss xmm0, dword ptr [rcx + 0xfa0] ; ret 
+127 3f8 1412cd410 | vmovss xmm0, dword ptr [rcx + 0x1ed0] ; vmovss xmm1, dword ptr [rcx + 0x1570] ; vsubss xmm3, xmm0, dword ptr [rcx + 0x1f94] ; vsubss xmm2, xmm1, dword ptr [rcx + 0x1634] ; vaddss xmm0, xmm3, xmm2 ; vmulss xmm0, xmm0, dword ptr [rip + 0x1096134] ; ret 
+128 400 140f64480 | vxorps xmm0, xmm0, xmm0 ; ret 
+129 408 1412c7f40 | (14+ insns) sub rsp, 0x38 ; vmovaps xmmword ptr [rsp + 0x20], xmm7 ; vxorps xmm0, xmm0, xmm0 ; vmovaps xmmword ptr [rsp + 0x10], xmm8 ; vcomiss xmm1, xmm0
+130 410 1412e7920 | mov eax, dword ptr [rcx + 0xa54] ; ret 
+131 418 1412e7930 | mov eax, dword ptr [rcx + 0xa58] ; ret 
+132 420 1412e9170 | mov eax, dword ptr [rcx + 0xa24] ; ret 
+133 428 14181f1e0 | vmovss xmm0, dword ptr [rcx + 0x168] ; ret 
+134 430 1412d4060 | mov eax, dword ptr [rcx + 0x174] ; ret 
+135 438 1412cdc40 | vmovss xmm0, dword ptr [rcx + 0x16c] ; ret 
+136 440 1412c72f0 | (14+ insns) cmp dword ptr [rcx + 0xa24], 0 ; je 0x1412c73a8 ; vmovss xmm0, dword ptr [rcx + 0x5c8] ; vmovss xmm1, dword ptr [rcx + 0x148] ; vxorps xmm3, xmm3, xmm3
+137 448 1412c36f0 | movzx eax, dl ; mov byte ptr [rcx + 0xaa0], dl ; mov byte ptr [rcx + 0xaa1], dl ; lea rdx, [rax + rax*2] ; mov eax, dword ptr [rcx + rdx*4 + 0xac0] ; mov dword ptr [rcx + 0xaac], eax ; ret 
+138 450 1412ddb20 | vmovss dword ptr [rcx + 0x4ed0], xmm1 ; vmovss dword ptr [rcx + 0x4ed4], xmm2 ; ret 
+139 458 1412c8020 | mov rax, qword ptr [rcx + 0xbc0] ; vmovss xmm0, dword ptr [rax + 0x3c0] ; ret 
+140 460 1412e83f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1570] ; ret 
+141 468 1412e8190 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1578] ; ret 
+142 470 1412e87f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1578] ; vmulss xmm0, xmm0, dword ptr [rip + 0x107adc5] ; ret 
+143 478 1412e8450 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; mov rax, qword ptr [rdx + rcx + 0x1640] ; vmovss xmm0, dword ptr [rax + 8] ; vmulss xmm1, xmm0, dword ptr [rip + 0x107b101] ; vmulss xmm0, xmm1, dword ptr [rip + 0xb3a05d] ; ret 
+144 480 1412e8810 | movsxd rax, r8d ; imul r8, rax, 0x4b0 ; mov rax, rdx ; vmovaps xmm0, xmmword ptr [r8 + rcx + 0x1290] ; vaddps xmm1, xmm0, xmmword ptr [rcx + 0xef0] ; vmovaps xmmword ptr [rdx], xmm1 ; ret 
+145 488 1412e8840 | (14+ insns) sub rsp, 0x18 ; vmovaps xmm0, xmmword ptr [rcx + 0xef0] ; movsxd rax, r8d ; imul r8, rax, 0x4b0 ; mov rax, rdx
+146 490 1412e7f20 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x40 ; movsxd rax, r8d
+147 498 1412e7eb0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x40 ; movsxd rax, edx ; lea r8, [rsp + 0x20]
+148 4a0 1412e8520 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11b8] ; ret 
+149 4a8 1412e8ba0 | (13+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x20 ; vmovaps xmm0, xmm2 ; movsxd rbx, edx
+150 4b0 1412e8770 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11d0] ; ret 
+151 4b8 1412e8790 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11d4] ; ret 
+152 4c0 1412e83d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11bc] ; vmulss xmm0, xmm0, dword ptr [rip + 0xbd9e91] ; ret 
+153 4c8 1412e8500 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11bc] ; ret 
+154 4d0 1412e8b80 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss dword ptr [rdx + rcx + 0x11bc], xmm2 ; ret 
+155 4d8 1412e87b0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1570] ; vmulss xmm0, xmm0, dword ptr [rdx + rcx + 0x11bc] ; ret 
+156 4e0 1412e8040 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; cmp byte ptr [rdx + rcx + 0x1550], 0 ; je 0x1412e805f ; lea rax, [rcx + 0x1300] ; add rax, rdx ; ret 
+157 4e8 1412e8040 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; cmp byte ptr [rdx + rcx + 0x1550], 0 ; je 0x1412e805f ; lea rax, [rcx + 0x1300] ; add rax, rdx ; ret 
+158 4f0 1412e7d80 | (14+ insns) vxorps xmm2, xmm2, xmm2 ; movsxd rax, r8d ; imul r10, rax, 0x4b0 ; lea eax, [r8 - 1] ; vmovaps xmm3, xmmword ptr [r10 + rcx + 0x12d0]
+159 4f8 1412e7bc0 | (14+ insns) vxorps xmm2, xmm2, xmm2 ; movsxd rax, r8d ; imul r8, rax, 0x4b0 ; mov rax, rdx ; vinsertps xmm2, xmm2, dword ptr [r8 + rcx + 0x12a0], 0
+160 500 1412e7aa0 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 0x10], rbx ; mov qword ptr [rax + 0x20], rsi ; push rdi ; sub rsp, 0xc0
+161 508 1412e7c80 | (14+ insns) vxorps xmm2, xmm2, xmm2 ; movsxd rax, r8d ; imul r8, rax, 0x4b0 ; mov rax, rdx ; vinsertps xmm2, xmm2, dword ptr [r8 + rcx + 0x12d0], 0
+162 510 1412e8c80 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss dword ptr [rdx + rcx + 0x1200], xmm2 ; ret 
+163 518 1412e89e0 | (14+ insns) movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15c4] ; mov eax, dword ptr [rdx + rcx + 0x15c8] ; mov dword ptr [rdx + rcx + 0x120c], 0x3f800000
+164 520 1412e7fc0 | (13+ insns) vmovss xmm1, dword ptr [rip + 0x107b5c4] ; movsxd rax, edx ; vxorps xmm2, xmm2, xmm2 ; imul rdx, rax, 0x4b0 ; vmovss xmm3, dword ptr [rdx + rcx + 0x1350]
+165 528 1412e8a50 | (14+ insns) vmovss xmm4, dword ptr [rip + 0x107ab34] ; vxorps xmm1, xmm1, xmm1 ; movsxd rax, edx ; vsubss xmm0, xmm2, xmm4 ; imul rdx, rax, 0x4b0
+166 530 1412e8c00 | (14+ insns) vmovss xmm4, dword ptr [rip + 0x107a984] ; vxorps xmm1, xmm1, xmm1 ; movsxd rax, edx ; vsubss xmm0, xmm2, xmm4 ; imul rdx, rax, 0x4b0
+167 538 1412e8b30 | (14+ insns) vmovss xmm3, dword ptr [rip + 0x107aa54] ; add rcx, 0x11e4 ; mov eax, 4 ; vsubss xmm4, xmm1, xmm3 ; vxorps xmm2, xmm2, xmm2
+168 540 1412e8480 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11e4] ; ret 
+169 548 1412e8170 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1484] ; ret 
+170 550 1412e84e0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11e0] ; ret 
+171 558 1412cd900 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x30 ; movsxd rax, edx
+172 560 1412e82f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x136c] ; ret 
+173 568 1412e81f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1368] ; ret 
+174 570 1412e8330 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1364] ; ret 
+175 578 1412e8370 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x13b8] ; ret 
+176 580 1412e8390 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x13a0] ; ret 
+177 588 1412e81d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1388] ; ret 
+178 590 1412e8310 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1370] ; ret 
+179 598 1412e8020 | movsxd rax, r8d ; imul r8, rax, 0x4b0 ; mov rax, rdx ; vmovaps xmm0, xmmword ptr [r8 + rcx + 0x1260] ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+180 5a0 1412e8090 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x120c] ; ret 
+181 5a8 1412e8070 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1210] ; ret 
+182 5b0 1412e80b0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1214] ; ret 
+183 5b8 1412e80d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11fc] ; ret 
+184 5c0 1412e80f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11f8] ; vaddss xmm0, xmm0, dword ptr [rdx + rcx + 0x11ec] ; ret 
+185 5c8 1412e8110 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11f8] ; vaddss xmm0, xmm0, dword ptr [rdx + rcx + 0x11f0] ; ret 
+186 5d0 1412e8130 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11f8] ; ret 
+187 5d8 1412e8150 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11f8] ; vaddss xmm0, xmm0, dword ptr [rdx + rcx + 0x11f4] ; ret 
+188 5e0 1412e8ad0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss dword ptr [rdx + rcx + 0x11ec], xmm2 ; ret 
+189 5e8 1412e8af0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss dword ptr [rdx + rcx + 0x11f0], xmm2 ; ret 
+190 5f0 1412e8b10 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss dword ptr [rdx + rcx + 0x11f4], xmm2 ; ret 
+191 5f8 1412e87d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1200] ; ret 
+192 600 1412e81b0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x123c] ; ret 
+193 608 1412e8210 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1234] ; ret 
+194 610 1412e8230 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x146c] ; vaddss xmm2, xmm0, dword ptr [rdx + rcx + 0x1454] ; vxorps xmm0, xmm0, xmm0 ; vxorps xmm1, xmm2, xmmword ptr [rip + 0x107b4f8] ; vcomiss xmm1, xmm0 ; jae 0x1412e8262 ; vmovaps xmm0, xmm2 ; ret 
+195 618 1412e82d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1240] ; ret 
+196 620 1412e8350 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1238] ; ret 
+197 628 1412e83b0 | movsxd rax, edx ; add rcx, 0x12a0 ; imul rdx, rax, 0x4b0 ; add rdx, rcx ; mov rcx, r8 ; jmp 0x141257690 ; int3 
+198 630 1412e84a0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1424] ; ret 
+199 638 1412e89c0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1244] ; ret 
+200 640 1412c6fc0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x30 ; xor ebx, ebx
+201 648 1412e84c0 | movsxd rax, edx ; vmovaps xmm1, xmm2 ; imul rdx, rax, 0x4b0 ; mov rcx, qword ptr [rdx + rcx + 0x1640] ; add rcx, 0x24 ; jmp 0x1412cd530 ; int3 
+202 650 1412e85f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11e8] ; ret 
+203 658 1412e8610 | (14+ insns) sub rsp, 0x18 ; vmovss xmm4, dword ptr [rip + 0x107af70] ; movsxd rax, edx ; mov r8, rcx ; imul r9, rax, 0x4b0
+204 660 1412e8890 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11b0] ; ret 
+205 668 1412e88b0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11b0] ; vsubss xmm0, xmm0, dword ptr [rdx + rcx + 0x1634] ; ret 
+206 670 1412e88d0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11b0] ; vsubss xmm0, xmm0, dword ptr [rdx + rcx + 0x15f8] ; ret 
+207 678 1412e8930 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x11b0] ; vsubss xmm0, xmm0, dword ptr [rcx - 0x23c] ; ret 
+208 680 1412e8950 | (14+ insns) sub rsp, 0x48 ; vmovss xmm1, dword ptr [rip + 0x107ac14] ; vmovss xmm0, dword ptr [rip + 0x107ac28] ; movsxd rax, edx ; imul rdx, rax, 0x4b0
+209 688 1412e85c0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15e4] ; vaddss xmm1, xmm0, dword ptr [rdx + rcx + 0x11cc] ; vaddss xmm0, xmm1, dword ptr [rcx + 0x20] ; ret 
+210 690 1412e8430 | movsxd rax, r8d ; imul r8, rax, 0x4b0 ; mov rax, rdx ; vmovaps xmm0, xmmword ptr [r8 + rcx + 0x1630] ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+211 698 1412e8410 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15fc] ; ret 
+212 6a0 1412e8170 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1484] ; ret 
+213 6a8 1412e8000 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x1488] ; ret 
+214 6b0 1412e8910 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15a8] ; ret 
+215 6b8 1412e88f0 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15ac] ; ret 
+216 6c0 1412e8540 | movsxd rax, edx ; add rcx, 0x11b0 ; vmovaps xmm1, xmm2 ; imul rdx, rax, 0x4b0 ; add rcx, rdx ; jmp 0x1412b92c0 ; int3 
+217 6c8 1412e8580 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15ec] ; ret 
+218 6d0 1412e8560 | movsxd rax, edx ; imul rdx, rax, 0x4b0 ; vmovss xmm0, dword ptr [rdx + rcx + 0x15e8] ; ret 
+219 6d8 1412e2800 | (14+ insns) push rbx ; sub rsp, 0x30 ; vmovaps xmm0, xmmword ptr [rdx] ; mov rax, qword ptr [rcx] ; lea rdx, [rsp + 0x20]
+220 6e0 1412c7040 | (12+ insns) movsxd rax, edx ; imul rdx, rax, 0x4b0 ; cmp byte ptr [rdx + rcx + 0x1550], 0 ; je 0x1412c707a ; lea rax, [rcx + 0x1300]
+221 6e8 1412cbea0 | movzx eax, byte ptr [rcx + 0xe58] ; ret 
+222 6f0 1412caed0 | mov eax, dword ptr [rcx + 0xabc] ; ret 
+223 6f8 1412cd340 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x80 ; vmovaps xmm0, xmmword ptr [rcx - 0x240]
+224 700 1412c5e10 | (14+ insns) sub rsp, 0x48 ; vmovaps xmm0, xmmword ptr [rcx - 0x390] ; vmovss xmm1, dword ptr [rip + 0x109d768] ; vxorps xmm4, xmm4, xmm4 ; vinsertps xmm4, xmm4, dword ptr [rcx - 0x380], 0
+225 708 1412c53e0 | cmp dword ptr [rcx + 0xdbc], 0 ; je 0x1412c53f5 ; cmp dword ptr [rcx + 0xfc4], 0 ; je 0x1412c53f5 ; mov al, 1 ; ret 
+226 710 1412cda20 | vmovss xmm0, dword ptr [rip + 0x1095b3c] ; vcomiss xmm0, dword ptr [rcx + 0xdac] ; setb al ; ret 
+227 718 1412c54e0 | xor eax, eax ; cmp dword ptr [rcx + 0xdb8], eax ; setne al ; ret 
+228 720 1412c8d80 | movzx eax, byte ptr [rcx + 0x4edc] ; ret 
+229 728 1412e1c10 | mov byte ptr [rcx + 0x4edc], dl ; ret 
+230 730 1412c8860 | vmovss xmm0, dword ptr [rcx + 0xdd8] ; ret 
+231 738 1412c8850 | vmovss xmm0, dword ptr [rcx + 0xddc] ; ret 
+232 740 1412e2850 | mov dword ptr [rcx + 0x11ac], edx ; ret 
+233 748 1412c5cd0 | (14+ insns) push rbx ; sub rsp, 0x50 ; movsxd rax, r8d ; vmovaps xmmword ptr [rsp + 0x40], xmm6 ; vmovaps xmmword ptr [rsp + 0x30], xmm7
+234 750 1412ce570 | vmovss xmm0, dword ptr [rcx + 0xf48] ; ret 
+235 758 1412c8030 | vmovss xmm0, dword ptr [rcx + 0xc4c] ; ret 
+236 760 1412e07d0 | vmovss dword ptr [rcx + 0xc4c], xmm1 ; ret 
+237 768 1412c8870 | vmovss xmm0, dword ptr [rcx + 0xf4c] ; ret 
+238 770 1412e1b50 | vmovss dword ptr [rcx + 0xf4c], xmm1 ; ret 
+239 778 1412c2540 | mov byte ptr [rcx + 0xde2], dl ; ret 
+240 780 1412d3e70 | movzx eax, byte ptr [rcx + 0xde2] ; ret 
+241 788 1412c7d10 | vmovsd xmm0, qword ptr [rcx + 0xde8] ; vcvtpd2ps xmm0, xmm0 ; ret 
+242 790 1412cda50 | vmovsd xmm0, qword ptr [rcx + 0xdf0] ; vcvtpd2ps xmm0, xmm0 ; ret 
+243 798 1412c7cf0 | movzx eax, byte ptr [rcx + 0xaa1] ; ret 
+244 7a0 1412c8880 | mov eax, edx ; lea rdx, [rax + rax*2] ; vmovss xmm0, dword ptr [rcx + rdx*4 + 0xac0] ; ret 
+245 7a8 1412c74f0 | cmp byte ptr [rcx + 0xab8], 0 ; jne 0x1412c7517 ; cmp byte ptr [rcx + 0xab9], 0 ; jne 0x1412c7517 ; movzx eax, byte ptr [rcx + 0xaa0] ; lea rdx, [rax + rax*2] ; vmovss xmm0, dword ptr [rcx + rdx*4 + 0xac0] ; ret 
+246 7b0 1412cd770 | mov eax, dword ptr [rcx + 0xf64] ; ret 
+247 7b8 1412e1c20 | mov byte ptr [rcx + 0xab9], dl ; ret 
+248 7c0 1412c8d90 | movzx eax, byte ptr [rcx + 0xab9] ; ret 
+249 7c8 1412cdc10 | vmovss xmm0, dword ptr [rcx + 0xaa4] ; vmulss xmm0, xmm0, dword ptr [rip + 0xbf465c] ; ret 
+250 7d0 1412c5c60 | vmovss xmm0, dword ptr [rcx + 0x1000] ; ret 
+251 7d8 1412c5c50 | vmovss xmm0, dword ptr [rcx + 0x1004] ; ret 
+252 7e0 1412c5c70 | vmovss xmm0, dword ptr [rcx + 0x1008] ; ret 
+253 7e8 1412c2500 | vmovss xmm0, dword ptr [rcx + 0x100c] ; ret 
+254 7f0 1412c2510 | vmovss xmm0, dword ptr [rcx + 0x1010] ; ret 
+255 7f8 1412c5c30 | vmovss xmm0, dword ptr [rcx + 0x1014] ; ret 
+256 800 1412c5c40 | vmovss xmm0, dword ptr [rcx + 0x1018] ; ret 
+257 808 1412c5c30 | vmovss xmm0, dword ptr [rcx + 0x1014] ; ret 
+258 810 1412c5c40 | vmovss xmm0, dword ptr [rcx + 0x1018] ; ret 
+259 818 1412c5c50 | vmovss xmm0, dword ptr [rcx + 0x1004] ; ret 
+260 820 1412c2500 | vmovss xmm0, dword ptr [rcx + 0x100c] ; ret 
+261 828 1412c5c60 | vmovss xmm0, dword ptr [rcx + 0x1000] ; ret 
+262 830 1412c2510 | vmovss xmm0, dword ptr [rcx + 0x1010] ; ret 
+263 838 1412c5c70 | vmovss xmm0, dword ptr [rcx + 0x1008] ; ret 
+264 840 1412c71c0 | vmovss xmm0, dword ptr [rcx + 0x1040] ; ret 
+265 848 1412c71b0 | vmovss xmm0, dword ptr [rcx + 0x103c] ; ret 
+266 850 1412c2520 | or eax, 0xffffffff ; mov r8d, 1 ; test dl, dl ; cmovne eax, r8d ; add dword ptr [rcx + 0x4ed8], eax ; ret 
+267 858 1412c7ee0 | (13+ insns) cmp dword ptr [rcx + 0x4ed8], 0 ; jle 0x1412c7f08 ; mov ecx, dword ptr [rcx + 0xf68] ; test ecx, ecx ; je 0x1412c7f08
+268 860 1412e0660 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1082f24] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e067a
+269 868 1412e0510 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1083074] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e052a
+270 870 1412c7f10 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0x1c] ; vmovss xmm1, dword ptr [rip + 0x109b66f] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+271 878 1412e0740 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1082e44] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e075a
+272 880 1412e0580 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1083004] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e059a
+273 888 1412c7d20 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0x101c] ; vmovss xmm1, dword ptr [rip + 0x109b85c] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+274 890 1412e0460 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1083124] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e047a
+275 898 1412c7e20 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0x1024] ; vmovss xmm1, dword ptr [rip + 0x109b75c] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+276 8a0 1412e05f0 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1082f94] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e060a
+277 8a8 1412c7ea0 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0x102c] ; vmovss xmm1, dword ptr [rip + 0x109b6dc] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+278 8b0 1412e06d0 | (14+ insns) vmovss xmm2, dword ptr [rip + 0x1082eb4] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jb 0x1412e06ea
+279 8b8 1412c7d60 | (11+ insns) vmovss xmm3, dword ptr [rcx + 0xa94] ; vmovss xmm1, dword ptr [rip + 0x109b81c] ; vxorps xmm2, xmm2, xmm2 ; vsubss xmm0, xmm3, xmm1 ; vcomiss xmm0, xmm2
+280 8c0 1412e04d0 | vmovss xmm2, dword ptr [rip + 0x10830b4] ; vxorps xmm3, xmm3, xmm3 ; vsubss xmm0, xmm1, xmm2 ; vcomiss xmm0, xmm3 ; jae 0x1412e04ea ; vmovaps xmm2, xmm1 ; vcomiss xmm2, xmm3 ; jb 0x1412e04f9 ; vmovss dword ptr [rcx + 0xa94], xmm2 ; ret 
+281 8c8 1412d9e70 | (14+ insns) push rbx ; sub rsp, 0x30 ; mov rax, qword ptr [rcx] ; vmovaps xmmword ptr [rsp + 0x20], xmm6 ; vxorps xmm6, xmm6, xmm6
+282 8d0 1412c6f50 | cmp dword ptr [rcx + 0xa90], 0 ; jne 0x1412c6f65 ; cmp byte ptr [rcx + 0xaa0], 9 ; je 0x1412c6f65 ; xor al, al ; ret 
+283 8d8 1412c6f40 | vmovss xmm0, dword ptr [rcx + 0xa8c] ; ret 
+284 8e0 1412d3e80 | movzx eax, byte ptr [rcx + 0xb4c] ; ret 
+285 8e8 1412c7d00 | movzx eax, byte ptr [rcx + 0xde5] ; ret 
+286 8f0 1412c8220 | vmovss xmm0, dword ptr [rcx + 0xb90] ; ret 
+287 8f8 140b2bc70 | vmovss xmm0, dword ptr [rcx + 0x28] ; ret 
+288 900 1412cd760 | vmovss xmm0, dword ptr [rcx + 0x58] ; ret 
+289 908 14107f1e0 | vmovss xmm0, dword ptr [rcx + 8] ; ret 
+290 910 1412cae70 | vmovss xmm0, dword ptr [rcx + 8] ; vdivss xmm0, xmm0, dword ptr [rcx + 0x58] ; ret 
+291 918 141008720 | vmovss xmm0, dword ptr [rcx + 0xc] ; ret 
+292 920 1412cae80 | vmovss xmm0, dword ptr [rcx + 0xc] ; vdivss xmm0, xmm0, dword ptr [rcx + 0x5c] ; ret 
+293 928 14194cb10 | vmovss xmm0, dword ptr [rcx + 0x34] ; ret 
+294 930 1412e2c30 | (14+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; vmovss dword ptr [rcx + 8], xmm1 ; vmovss dword ptr [rcx + 0xc], xmm1
+295 938 1412cf480 | mov eax, dword ptr [rcx + 0x1b8] ; ret 
+296 940 1412e3200 | test dl, dl ; je 0x1412e3227 ; mov eax, dword ptr [rcx + 0x4ee0] ; test eax, eax ; je 0x1412e321c ; cmp eax, 3 ; je 0x1412e321c ; inc eax ; mov dword ptr [rcx + 0x4ee0], eax ; ret 
+297 948 1412d3f80 | xor eax, eax ; cmp dword ptr [rcx + 0x4ee0], eax ; setne al ; ret 
+298 950 1412e1c00 | mov byte ptr [rcx + 0x4ee5], dl ; ret 
+299 958 1412d3e90 | movzx eax, byte ptr [rcx + 0x4ee5] ; ret 
+300 960 1412deb10 | mov byte ptr [rcx + 0x4ee6], dl ; ret 
+301 968 1412c6da0 | movzx eax, byte ptr [rcx + 0x4ee6] ; ret 
+302 970 1412cbed0 | movsxd rax, r8d ; sub rax, 0x38 ; add rax, rax ; vmovaps xmm0, xmmword ptr [rcx + rax*8] ; mov rax, rdx ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+303 978 1412b7f20 | add rcx, -0x3a0 ; jmp 0x1412b7f30 ; int3 
+304 980 1412caf60 | movzx eax, byte ptr [rcx - 0x5f] ; mov dword ptr [rdx], eax ; lea rax, [rcx - 0x78] ; mov qword ptr [r8], rax ; ret 
+305 988 1412ce5a0 | movzx eax, byte ptr [rcx - 0x60] ; mov dword ptr [rdx], eax ; lea rax, [rcx - 0x90] ; mov qword ptr [r8], rax ; ret 
+306 990 1412c7760 | (14+ insns) push rbx ; push rbp ; push rsi ; push rdi ; sub rsp, 0x28
+307 998 1412c5f00 | lea rax, [rcx - 0x220] ; ret 
+308 9a0 1412e8ee0 | (14+ insns) push rbx ; sub rsp, 0x50 ; vmovaps xmm0, xmmword ptr [rip + 0xbc6c92] ; movsxd rax, r8d ; mov rbx, rdx
+309 9a8 1412e8ca0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x30 ; vmovaps xmm0, xmmword ptr [r8] ; mov rdi, rdx
+310 9b0 1412e8cf0 | add rcx, -0x3a0 ; jmp 0x1412e8d00 ; int3 
+311 9b8 1412e8e70 | sub rsp, 0x38 ; vmovaps xmm0, xmmword ptr [r8] ; mov rax, rdx ; lea rdx, [rcx - 0x380] ; lea r8, [rsp + 0x20] ; mov rcx, rax ; vmovaps xmmword ptr [rsp + 0x20], xmm0 ; call 0x141257880 ; add rsp, 0x38 ; ret 
+312 9c0 1412ba590 | (12+ insns) vpermilps xmm4, xmmword ptr [rcx - 0x340], 0xc9 ; vpermilps xmm3, xmmword ptr [r8], 0xd2 ; vpermilps xmm1, xmm3, 0xd2 ; vpermilps xmm0, xmm4, 0xc9 ; vmulps xmm2, xmm1, xmm0
+313 9c8 1412ba500 | add rcx, -0x3a0 ; jmp 0x1412ba510 ; int3 
+314 9d0 1412e1bf0 | vmovaps xmm0, xmmword ptr [rdx] ; vmovaps xmmword ptr [rcx - 0x240], xmm0 ; ret 
+315 9d8 1412c8890 | vmovaps xmm0, xmmword ptr [rcx - 0x240] ; vmovaps xmmword ptr [rdx], xmm0 ; ret 
+316 9e0 1412c6db0 | vxorps xmm0, xmm0, xmm0 ; mov rax, rdx ; vsubps xmm1, xmm0, xmmword ptr [rcx - 0x240] ; vmovaps xmmword ptr [rdx], xmm1 ; ret 
+317 9e8 1412bffc0 | (14+ insns) sub rsp, 0x38 ; mov qword ptr [rsp + 0x20], 0xfffffffffffffffe ; mov ecx, 0x1380 ; call 0x1403229c0 ; mov qword ptr [rsp + 0x48], rax
+318 9f0 140f47840 | mov rcx, rdx ; jmp 0x14031c7b0 ; int3 
+319 9f8 1412c67a0 | (14+ insns) mov qword ptr [rsp + 0x10], rbx ; push rdi ; sub rsp, 0x20 ; mov rbx, rdx ; mov rdi, rcx
+320 a00 1412c6c60 | mov eax, 0x1380 ; ret 
+321 a08 1412de140 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rbp ; mov qword ptr [rsp + 0x18], rsi ; mov qword ptr [rsp + 0x20], rdi ; push r12
+322 a10 1412deae0 | vmovups xmm0, xmmword ptr [r8] ; vmovups xmmword ptr [rdx + 0x490], xmm0 ; vmovsd xmm1, qword ptr [r8 + 0x10] ; vmovsd qword ptr [rdx + 0x4a0], xmm1 ; mov eax, dword ptr [r8 + 0x18] ; mov dword ptr [rdx + 0x4a8], eax ; ret 
+323 a18 1412c6a30 | (14+ insns) vmovups xmm2, xmmword ptr [rcx - 0x390] ; mov r8, rcx ; xor r9d, r9d ; mov r10, r8 ; sub r10, rdx
+324 a20 1412de3d0 | (14+ insns) vmovups xmm0, xmmword ptr [rdx] ; mov r9, rcx ; mov r8, rdx ; vmovaps xmmword ptr [rcx - 0x390], xmm0 ; vmovups xmm1, xmmword ptr [rdx + 0x10]
+325 a28 1412e25e0 | neg dl ; sbb eax, eax ; and eax, 8 ; mov dword ptr [rcx + 0x11ac], eax ; ret 
+326 a30 1412e18f0 | (14+ insns) mov r11, rsp ; push rdi ; sub rsp, 0x430 ; mov eax, dword ptr [rcx + 0x1b8] ; mov rdi, rdx
+327 a38 1412e1880 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x30 ; mov rax, qword ptr [rsp + 0x60]
+328 a40 1412cad40 | mov eax, dword ptr [rcx + 0xabc] ; vmovss xmm0, dword ptr [rcx + 0x5c8] ; dec eax ; cdqe  ; lea rdx, [rax + rax*2] ; mov rax, qword ptr [rcx + 0xbc0] ; vdivss xmm1, xmm0, dword ptr [rcx + rdx*4 + 0xac0] ; vdivss xmm2, xmm1, dword ptr [rcx + 0xb90] ; vmulss xmm0, xmm2, dword ptr [rax + 0x3c0] ; ret 
+329 a48 1412cad80 | vmovss xmm1, dword ptr [rcx + 0x10b0] ; vmovss xmm0, dword ptr [rcx + 0xc4c] ; vaddss xmm2, xmm1, dword ptr [rcx + 0x1080] ; vmulss xmm3, xmm0, dword ptr [rcx + 0x5e4] ; vmovss xmm1, dword ptr [rip + 0xb4dcec] ; vaddss xmm0, xmm2, dword ptr [rcx + 0x10e0] ; vdivss xmm0, xmm3, xmm0 ; jmp 0x140f17ed8 ; int3 
+330 a50 1412cdb30 | mov rax, qword ptr [rcx + 0x1640] ; vmovss xmm0, dword ptr [rax + 0xc] ; ret 
+331 a58 1412bc3f0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; mov eax, 0x13a0 ; call 0x140f17e60 ; sub rsp, rax
+332 a60 1412e1b90 | (14+ insns) vmovss xmm3, dword ptr [rip + 0x10819f4] ; vxorps xmm4, xmm4, xmm4 ; vsubss xmm0, xmm1, xmm3 ; vcomiss xmm0, xmm4 ; jb 0x1412e1baa
+333 a68 1412e1b60 | vmovss xmm3, dword ptr [rip + 0x1081a24] ; vxorps xmm0, xmm0, xmm0 ; vsubss xmm2, xmm1, xmm3 ; vcomiss xmm2, xmm0 ; jb 0x1412e1b7f ; vmovss dword ptr [rcx + 0x1ac], xmm3 ; ret 
+334 a70 1412c5500 | (14+ insns) mov rax, rsp ; push rbx ; sub rsp, 0xd0 ; vmovaps xmmword ptr [rax - 0x18], xmm6 ; vmovaps xmmword ptr [rax - 0x28], xmm7
+335 a78 1412b46f0 | (14+ insns) push rbx ; sub rsp, 0x40 ; vmovss xmm1, dword ptr [rip + 0x10aee8e] ; lea rbx, [rcx + 0x148] ; vmovaps xmmword ptr [rsp + 0x30], xmm6
+336 a80 1412c8010 | lea rax, [rcx + 0xdc0] ; ret 
+337 a88 1412c8010 | lea rax, [rcx + 0xdc0] ; ret 
+338 a90 1412d4070 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0x40 ; cmp byte ptr [rcx + 0x4ede], 0
+339 a98 1412cda40 | vmovss xmm0, dword ptr [rcx + 0x1190] ; ret 
+340 aa0 1412c5f10 | vmovss xmm0, dword ptr [rcx + 0x1194] ; ret 
+341 aa8 1412cae60 | vmovss xmm0, dword ptr [rcx + 0x190] ; ret 
+342 ab0 1412ba0f0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rbp ; mov qword ptr [rsp + 0x18], rsi ; push rdi ; mov eax, 0x27150
+343 ab8 1412e66a0 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 8], rbx ; mov qword ptr [rax + 0x10], rsi ; push rdi ; sub rsp, 0xa0
+344 ac0 1412baa20 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 8], rbx ; mov qword ptr [rax + 0x10], rbp ; mov qword ptr [rax + 0x18], rsi ; mov qword ptr [rax + 0x20], rdi
+345 ac8 1412ba1f0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rdi ; push rbp ; lea rbp, [rsp - 0x57] ; sub rsp, 0xc0
+346 ad0 1412e2870 | mov dword ptr [rcx + 0xfb0], edx ; ret 
+347 ad8 1412afdf0 | vmovaps xmm0, xmmword ptr [rip + 0xd4e498] ; vmulps xmm0, xmm0, xmmword ptr [rdx] ; vaddps xmm1, xmm0, xmmword ptr [rcx + 0xd60] ; vmovaps xmmword ptr [rcx + 0xd60], xmm1 ; ret 
+348 ae0 1412afb20 | vmovaps xmm0, xmmword ptr [rip + 0xd4e768] ; vmulps xmm0, xmm0, xmmword ptr [rdx] ; vaddps xmm1, xmm0, xmmword ptr [rcx + 0xd50] ; vmovaps xmmword ptr [rcx + 0xd50], xmm1 ; ret 
+349 ae8 1412af9f0 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 8], rbx ; push rdi ; sub rsp, 0x90 ; vmovaps xmmword ptr [rax - 0x18], xmm6
+350 af0 1412b8180 | (14+ insns) push rbx ; sub rsp, 0x30 ; vxorps xmm0, xmm0, xmm0 ; vmovaps xmmword ptr [rsp + 0x20], xmm6 ; mov rbx, rcx
+351 af8 1412cc040 | (14+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+352 b00 1412c8dd0 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+353 b08 1412c89c0 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+354 b10 1412c8990 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+355 b18 1412cda60 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+356 b20 1412cdac0 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+357 b28 1412cda90 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+358 b30 1412cd5b0 | (11+ insns) push rbx ; sub rsp, 0x20 ; mov rax, qword ptr [rcx] ; mov rbx, rcx ; call qword ptr [rax + 0xbc8]
+359 b38 1412d6eb0 | (14+ insns) mov qword ptr [rsp + 0x18], rbp ; push rdi ; sub rsp, 0x40 ; vmulss xmm0, xmm3, dword ptr [rip + 0xb41bc6] ; vmovaps xmmword ptr [rsp + 0x30], xmm6
+360 b40 1412d6fa0 | (14+ insns) vmovss dword ptr [rsp + 0x20], xmm3 ; push rdi ; push r12 ; sub rsp, 0x118 ; vmovaps xmm0, xmmword ptr [rcx - 0x350]
+361 b48 1412c63e0 | (14+ insns) mov qword ptr [rsp + 8], rbx ; mov qword ptr [rsp + 0x10], rsi ; push rdi ; sub rsp, 0xc0 ; vmovaps xmm0, xmmword ptr [rcx - 0x390]
+362 b50 1412ddd00 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x30 ; vmovaps xmm5, xmmword ptr [rdx] ; vmovaps xmm0, xmmword ptr [rip + 0x239ceba]
+363 b58 1412ddca0 | (14+ insns) vmovaps xmm0, xmmword ptr [rdx] ; vmovaps xmmword ptr [rcx - 0x390], xmm0 ; vmovaps xmm1, xmmword ptr [rdx + 0x10] ; vmovaps xmmword ptr [rcx - 0x350], xmm1 ; vdpps xmm0, xmm1, xmm1, 0x7f
+364 b60 1412de0f0 | (13+ insns) vmovaps xmm0, xmmword ptr [r8] ; vmovaps xmmword ptr [rdx], xmm0 ; vmovaps xmm1, xmmword ptr [r8 + 0x10] ; vmovaps xmmword ptr [rdx + 0x10], xmm1 ; vmovaps xmm0, xmmword ptr [r8 + 0x20]
+365 b68 1412de0f0 | (13+ insns) vmovaps xmm0, xmmword ptr [r8] ; vmovaps xmmword ptr [rdx], xmm0 ; vmovaps xmm1, xmmword ptr [r8 + 0x10] ; vmovaps xmmword ptr [rdx + 0x10], xmm1 ; vmovaps xmm0, xmmword ptr [r8 + 0x20]
+366 b70 1412c6fa0 | vmovss xmm0, dword ptr [rcx + 0xf88] ; ret 
+367 b78 1412dec20 | vmovss dword ptr [rcx + 0xf88], xmm1 ; ret 
+368 b80 1412c62d0 | test dl, dl ; je 0x1412c62dd ; vmovss xmm0, dword ptr [rcx + 0xf90] ; ret 
+369 b88 1412ddc40 | vmovss dword ptr [rcx + 0xf8c], xmm1 ; vmovss dword ptr [rcx + 0xf90], xmm2 ; ret 
+370 b90 1412bbb90 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 0x10], rbp ; mov qword ptr [rax + 0x18], rsi ; push rdi ; sub rsp, 0xc0
+371 b98 1412be840 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 8], rbx ; mov qword ptr [rax + 0x10], rbp ; mov qword ptr [rax + 0x18], rsi ; mov qword ptr [rax + 0x20], rdi
+372 ba0 1412ea880 | (14+ insns) mov rax, rsp ; mov qword ptr [rax + 8], rbx ; mov qword ptr [rax + 0x10], rbp ; mov qword ptr [rax + 0x18], rsi ; mov qword ptr [rax + 0x20], rdi
+373 ba8 1412bee10 | mov eax, dword ptr [r8] ; vmovss xmm1, dword ptr [r8 + 8] ; vmovss xmm0, dword ptr [r8 + 4] ; mov dword ptr [rdx], eax ; lea rcx, [rdx + 0xc] ; vmovss dword ptr [rdx + 4], xmm0 ; vmovss dword ptr [rdx + 8], xmm1 ; lea rdx, [r8 + 0x30] ; jmp 0x1412527c0 ; int3 
+374 bb0 1412eae10 | (11+ insns) mov eax, dword ptr [r9] ; mov rcx, rdx ; mov dword ptr [rdx], eax ; mov eax, dword ptr [r9 + 4] ; add rcx, 0x30
+375 bb8 1412be740 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x30 ; vmovaps xmm0, xmmword ptr [r8] ; mov rbx, r8
+376 bc0 1412ea780 | (14+ insns) mov qword ptr [rsp + 8], rbx ; push rdi ; sub rsp, 0x30 ; vmovaps xmm0, xmmword ptr [r8] ; mov rbx, r8
+377 bc8 1412d3eb0 | movzx eax, byte ptr [rcx + 0x4ee7] ; ret 
+378 bd0 1412d3cd0 | movzx eax, byte ptr [rcx + 0x4ee9] ; ret 
+379 bd8 1412f3fc0 | movzx eax, byte ptr [rcx + 0x4eea] ; ret 
+380 be0 1412cae40 | mov eax, dword ptr [rcx + 0x4eec] ; ret 

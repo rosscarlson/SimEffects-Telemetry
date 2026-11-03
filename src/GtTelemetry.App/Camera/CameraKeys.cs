@@ -90,8 +90,8 @@ public static class CameraKeys
 }
 
 /// <summary>
-/// Watches the keyboard while PCSX2 has focus and turns bound combinations into camera actions (and keeps them from
-/// reaching PCSX2). A low-level hook rather than global hotkeys, so the keys still work normally in other apps.
+/// Watches the keyboard while a game's emulator (PCSX2 or Azimuth) has focus and turns bound combinations into camera
+/// actions (and keeps them from reaching the game). A low-level hook rather than global hotkeys, so the keys still work normally in other apps.
 /// </summary>
 public sealed class KeyboardHook : IDisposable
 {
@@ -125,10 +125,10 @@ public sealed class KeyboardHook : IDisposable
     private readonly HookProc proc;
     private readonly IntPtr hook;
     private readonly Func<KeyCombo, bool, bool> handler;
-    private readonly Dictionary<uint, bool> isPcsx2 = [];
+    private readonly Dictionary<uint, bool> isGame = [];
 
     /// <param name="handler">Called on the UI thread with the combination and whether Shift is held; returns true if
-    /// it was a camera key (then PCSX2 doesn't see it).</param>
+    /// it was a camera key (then the game doesn't see it).</param>
     public KeyboardHook(Func<KeyCombo, bool, bool> handler)
     {
         this.handler = handler;
@@ -141,19 +141,23 @@ public sealed class KeyboardHook : IDisposable
     /// <summary>Shift held anywhere (it makes steps bigger for controller buttons too).</summary>
     public static bool ShiftDown() => (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 
-    /// <summary>The PCSX2 window that has focus, if any.</summary>
-    public IntPtr Pcsx2Foreground()
+    /// <summary>The PCSX2 or Azimuth window that has focus, if any.</summary>
+    public IntPtr GameForeground()
     {
         var fg = GetForegroundWindow();
         if (fg == IntPtr.Zero) return IntPtr.Zero;
         GetWindowThreadProcessId(fg, out uint pid);
         // The hook has to answer quickly, so only look up a process the first time it has focus.
-        if (!isPcsx2.TryGetValue(pid, out bool yes))
+        if (!isGame.TryGetValue(pid, out bool yes))
         {
-            try { yes = Process.GetProcessById((int)pid).ProcessName.StartsWith("pcsx2", StringComparison.OrdinalIgnoreCase); }
+            try
+            {
+                string name = Process.GetProcessById((int)pid).ProcessName;
+                yes = name.StartsWith("pcsx2", StringComparison.OrdinalIgnoreCase) || name.Equals("azimuth", StringComparison.OrdinalIgnoreCase);
+            }
             catch (ArgumentException) { yes = false; }
             catch (InvalidOperationException) { yes = false; }
-            isPcsx2[pid] = yes;
+            isGame[pid] = yes;
         }
         return yes ? fg : IntPtr.Zero;
     }
@@ -169,7 +173,7 @@ public sealed class KeyboardHook : IDisposable
             if (Down(VK_CONTROL)) mods |= ModifierKeys.Control;
             if (Down(VK_MENU)) mods |= ModifierKeys.Alt;
             if (Down(VK_LWIN) || Down(VK_RWIN)) mods |= ModifierKeys.Windows;
-            if (mods != ModifierKeys.None && Pcsx2Foreground() != IntPtr.Zero)
+            if (mods != ModifierKeys.None && GameForeground() != IntPtr.Zero)
             {
                 try
                 {

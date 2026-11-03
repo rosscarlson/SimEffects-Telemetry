@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -11,7 +11,9 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <AssemblyName>SimEffectsTelemetry</AssemblyName>
     <RootNamespace>GtTelemetry.App</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,5 +23,22 @@
   <ItemGroup>
     <Resource Include="Assets\App.ico" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Azimuth's wheel bindings read controllers through DirectInput, like Azimuth does. -->
+    <PackageReference Include="Vortice.DirectInput" Version="3.8.3" />
+  </ItemGroup>
+
+  <!-- The Azimuth-Span shim (C, ..\..\AzimuthSpan) is built with the VS Build Tools and embedded; Render Aspect Ratio
+       installs it as dinput8.dll next to azimuth.exe. -->
+  <PropertyGroup>
+    <ShimDir>$(MSBuildThisFileDirectory)..\..\AzimuthSpan\</ShimDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(ShimDir)out\dinput8.dll" LogicalName="AzimuthSpan.dinput8.dll" Link="AzimuthSpan\dinput8.dll" />
+  </ItemGroup>
+  <Target Name="BuildAzimuthSpan" BeforeTargets="PrepareForBuild" Inputs="$(ShimDir)src\span.c;$(ShimDir)src\span.def" Outputs="$(ShimDir)out\dinput8.dll">
+    <Exec Command="&quot;$(ShimDir)build.cmd&quot;" />
+  </Target>
 
 </Project>
