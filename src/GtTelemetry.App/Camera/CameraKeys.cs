@@ -32,8 +32,8 @@ public readonly record struct KeyCombo(ModifierKeys Modifiers, Key Key)
         Key.OemQuotes => "'",
         Key.OemPipe => "\\",
         Key.OemTilde => "`",
-        Key.PageUp => "PageUp",
-        Key.PageDown => "PageDown",
+        Key.PageUp => "PgUp",
+        Key.PageDown => "PgDn",
         >= Key.D0 and <= Key.D9 => ((char)('0' + (k - Key.D0))).ToString(),
         _ => k.ToString(),
     };
@@ -84,6 +84,9 @@ public static class CameraKeys
     /// another action.</summary>
     public static KeyCombo? For(AppSettings s, CameraAction a) =>
         s.CameraKeys.TryGetValue(a.ToString(), out var text) ? KeyCombo.Parse(text) : All.First(x => x.Action == a).Default;
+
+    public static PadButton? ButtonFor(AppSettings s, CameraAction a) =>
+        s.CameraButtons.TryGetValue(a.ToString(), out var text) ? PadButton.Parse(text) : null;
 }
 
 /// <summary>
@@ -134,6 +137,9 @@ public sealed class KeyboardHook : IDisposable
     }
 
     public bool Installed => hook != IntPtr.Zero;
+
+    /// <summary>Shift held anywhere (it makes steps bigger for controller buttons too).</summary>
+    public static bool ShiftDown() => (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 
     /// <summary>The PCSX2 window that has focus, if any.</summary>
     public IntPtr Pcsx2Foreground()

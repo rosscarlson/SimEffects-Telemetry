@@ -11,8 +11,8 @@ For GT4 Spec II, all of these work today:
 | Feature | What it does |
 |---|---|
 | Telemetry | Forza Data Out over UDP (Horizon or Dash format) for SimHub: engine, pedals, gear, body motion, suspension, slip and kerbs. Pausing sends "not driving" |
-| Display modes | 16:9, 21:9, 32:9, 48:9 and 64:9 with the HUD rescaled, through PCSX2's per-game settings and cheat file (backed up first) |
-| Camera | Live FOV and seat position for the cockpit and hood views. Hotkeys work while PCSX2 has focus (default Ctrl+Alt+arrows, PageUp/PageDown, = and −, and Home to reset; hold Shift for bigger steps). A read-out shows over the game while adjusting, and settings are saved per car and view |
+| Display modes | 16:9, 21:9 and 32:9 with the HUD rescaled, through PCSX2's per-game settings and cheat file (backed up first). 48:9 and 64:9 aren't offered any more, but keep working if already set |
+| Camera | Live FOV and seat position for the cockpit and hood views. Keys or controller buttons (wheel, button box, gamepad) work while PCSX2 has focus. Default keys are Ctrl+Alt+arrows, PgUp/PgDn, = and −, and Home to reset; hold Shift for bigger steps. A read-out shows over the game while adjusting, and settings are saved per car and view |
 
 The address-finding tools are in the app with `--dev`, and in the CLI:
 

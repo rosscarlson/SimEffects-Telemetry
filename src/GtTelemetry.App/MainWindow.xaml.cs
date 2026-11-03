@@ -167,15 +167,13 @@ public partial class MainWindow : Window
         {
             DisplayBox.IsEnabled = Pcsx2FolderBox.IsEnabled = supported;
             DisplayApply.IsEnabled = false;
-            DisplayCurrent.Text = "";
             ShowDisplayError(null);
             if (!supported)
             {
                 DisplayBox.ItemsSource = null;
-                DisplayInfo.Text = $"Display modes aren't available for {a.Name} yet.";
                 return;
             }
-            if (DisplayBox.ItemsSource == null) DisplayBox.ItemsSource = Gt4SpecIIDisplay.Modes;
+            if (DisplayBox.ItemsSource == null) DisplayBox.ItemsSource = Gt4SpecIIDisplay.Choices;
             pcsx2Data = Pcsx2Folders.Find(state.Settings.Pcsx2Folder);
             Pcsx2FolderBox.Text = pcsx2Data ?? state.Settings.Pcsx2Folder ?? "";
             if (pcsx2Data == null)
@@ -191,8 +189,9 @@ public partial class MainWindow : Window
                 state.Settings.Save();
             }
             displayState = Gt4SpecIIDisplay.Read(pcsx2Data);
-            DisplayCurrent.Text = "Now set to " + displayState.Description + ".";
-            DisplayBox.SelectedItem = displayState.Closest ?? DisplayBox.SelectedItem ?? Gt4SpecIIDisplay.Modes[0];
+            // A mode that's no longer offered (48:9, 64:9) shows as no selection; it keeps working until another is applied.
+            DisplayBox.SelectedItem = displayState.Closest is { } c && Gt4SpecIIDisplay.Choices.Contains(c) ? c : null;
+            DisplayBox.ToolTip = displayState.Description;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -207,8 +206,11 @@ public partial class MainWindow : Window
 
     private void UpdateDisplayChoice()
     {
-        if (DisplayBox.SelectedItem is not DisplayMode mode) return;
-        DisplayInfo.Text = mode.Description;
+        if (DisplayBox.SelectedItem is not DisplayMode mode)
+        {
+            DisplayApply.IsEnabled = false;
+            return;
+        }
         DisplayApply.IsEnabled = pcsx2Data != null && displayState?.Mode != mode;
     }
 

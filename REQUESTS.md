@@ -167,3 +167,7 @@ unpaused in hood view
 1. I have no numpad on my keyboard so do NOT use those keys
 2. sounds right
 3. give me new exe and commit
+
+remove 48:9 and 64:9 options in the Display drop down - then remove the text below it and the text at the bottom of "Camera". Also where we can set the bindings for each of the seat movements should also be able to be a joystick button, not just a keyboard key(s).
+
+continue

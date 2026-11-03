@@ -83,8 +83,6 @@
                             <Button x:Name="DisplayApply" Grid.Column="1" Style="{StaticResource AccentButton}" Content="Apply" Margin="8,0,0,0"
                                     Click="DisplayApply_Click" ToolTip="Writes PCSX2's settings for this game. The old files are backed up first."/>
                         </Grid>
-                        <TextBlock x:Name="DisplayInfo" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                        <TextBlock x:Name="DisplayCurrent" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
 
                         <TextBlock Text="PCSX2 folder" Margin="0,12,0,6"/>
                         <Grid>
@@ -114,19 +112,27 @@
                         <ItemsControl x:Name="CameraKeyList" Margin="0,12,0,0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <DockPanel Margin="0,0,0,4">
-                                        <Button DockPanel.Dock="Right" MinWidth="138" Padding="8,2" MinHeight="26" Click="CameraKey_Click"
-                                                ToolTip="Click, then press the new keys (Ctrl or Alt plus a key). Esc cancels.">
-                                            <TextBlock Text="{Binding KeyText}" Style="{StaticResource MonoText}"/>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="124"/>
+                                            <ColumnDefinition Width="90"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <Button Grid.Column="1" Padding="4,2" MinHeight="26" Margin="4,0,0,0" Click="CameraKey_Click"
+                                                ToolTip="Click, then press the new keys (Ctrl or Alt plus a key). Delete clears it, Esc cancels.">
+                                            <TextBlock Text="{Binding KeyText}" FontSize="12" TextTrimming="CharacterEllipsis"/>
                                         </Button>
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                    </DockPanel>
+                                        <Button Grid.Column="2" Padding="4,2" MinHeight="26" Margin="4,0,0,0" Click="CameraPad_Click"
+                                                ToolTip="{Binding PadTip}">
+                                            <TextBlock Text="{Binding PadText}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                        </Button>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0"
-                                   Text="Hold Shift for bigger steps (5 cm). Changes are saved for each car and view, and put back the next time you drive it."/>
-                        <Button Content="Default keys" HorizontalAlignment="Left" Margin="0,10,0,0" Click="CameraDefaultKeys_Click"/>
+                        <Button Content="Default keys" HorizontalAlignment="Left" Margin="0,10,0,0" Click="CameraDefaultKeys_Click"
+                                ToolTip="Puts the keyboard keys back to the defaults. Controller buttons are kept."/>
                     </StackPanel>
                 </Border>
 

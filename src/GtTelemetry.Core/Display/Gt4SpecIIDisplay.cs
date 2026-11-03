@@ -63,6 +63,9 @@ public static class Gt4SpecIIDisplay
         new("64:9", "64:9 triple screens", "One wide view across triples at 10240×1440, HUD and menus rescaled.", "Stretch", ManagedCheat64),
     ];
 
+    /// <summary>The modes offered in the app. 48:9 and 64:9 are still recognised and kept working if already set.</summary>
+    public static readonly IReadOnlyList<DisplayMode> Choices = [.. Modes.Where(m => m.Id is "16:9" or "21:9" or "32:9")];
+
     /// <summary>
     /// A pnach group for a width of <paramref name="ninths"/>:9. With a = ninths / 16 (1 at 16:9): 3D aspect a; HUD canvas
     /// −880a + 480 to 444a − 140; HUD text and ModelFaces × 0.75 / a; mirror width 487.5a; menu text (12 / ninths) × 1.0666;

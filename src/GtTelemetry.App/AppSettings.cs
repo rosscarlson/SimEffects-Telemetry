@@ -69,6 +69,9 @@ public sealed class AppSettings
     /// <summary>Camera action → key combination, e.g. "Ctrl+Alt+Up". Missing actions use the defaults.</summary>
     public Dictionary<string, string> CameraKeys { get; set; } = [];
 
+    /// <summary>Camera action → controller button, "VID:PID|button". None by default.</summary>
+    public Dictionary<string, string> CameraButtons { get; set; } = [];
+
     /// <summary>Seat and FOV per car and view, keyed "adapter|game seat position".</summary>
     public Dictionary<string, CameraProfile> CameraProfiles { get; set; } = [];
 
