@@ -1,0 +1,22 @@
+{
+  // For `gtt record physics-drive`: a continuous recording, analysed offline. Each step's "sample" is how long the
+  // recording runs after the instruction before the next one. Labels name the segment for the analysis.
+  "id": "physics-drive",
+  "name": "Physics drive (record)",
+  "description": "Continuous recording for suspension, slip, accelerations, curbs and surfaces.",
+  "setup": "On track, stopped on or near a straight, with a curb and some grass or gravel close by.",
+  "intro": "Physics drive. Do each thing as I call it, and keep going until the next call.",
+  "outro": "Recording done. Thanks.",
+  "types": ["f32"],
+  "steps": [
+    { "say": "Sit still, stopped.", "sample": 3, "label": 1 },
+    { "say": "Full throttle in a straight line.", "sample": 5, "label": 2 },
+    { "say": "Brake hard to a stop.", "sample": 4, "label": 3 },
+    { "say": "Pull away and weave left and right.", "sample": 9, "label": 4 },
+    { "say": "Drive over a curb with the left wheels, then the right.", "sample": 14, "label": 5 },
+    { "say": "Drive onto the grass or gravel with all four wheels.", "sample": 8, "label": 6 },
+    { "say": "Back onto the track.", "sample": 6, "label": 7 },
+    { "say": "Spin the rear wheels: stop, then full throttle from standstill.", "sample": 7, "label": 8 },
+    { "say": "Brake and stop.", "sample": 4, "label": 9 }
+  ]
+}

@@ -1,0 +1,264 @@
+﻿<Window x:Class="GtTelemetry.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:GtTelemetry.App.Views"
+        Title="SimEffects Telemetry" Width="1320" Height="900" MinWidth="1080" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBrush}" Foreground="{DynamicResource TextBrush}"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13" UseLayoutRounding="True"
+        SourceInitialized="Window_SourceInitialized" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown">
+    <Grid Margin="20,16,20,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="362"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,14" LastChildFill="False">
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <TextBlock Text="SimEffects Telemetry" FontSize="22" FontWeight="SemiBold"/>
+                <TextBlock x:Name="VersionText" Style="{StaticResource SecondaryText}" Margin="10,0,0,4" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Theme" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <ComboBox x:Name="ThemeBox" Width="116" SelectionChanged="ThemeBox_SelectionChanged">
+                    <ComboBoxItem Content="Dark"/>
+                    <ComboBoxItem Content="Light"/>
+                    <ComboBoxItem Content="System"/>
+                </ComboBox>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Left column: settings cards -->
+        <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="0,0,10,0">
+
+                <!-- Game -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Game" Style="{StaticResource CardHeader}"/>
+                        <ComboBox x:Name="AdapterBox" DisplayMemberPath="Name" SelectionChanged="AdapterBox_SelectionChanged"/>
+                        <TextBlock x:Name="AdapterInfo" Style="{StaticResource SecondaryText}" Margin="0,6,0,10"/>
+                        <ItemsControl x:Name="FeatureList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel Margin="0,0,0,6" ToolTip="{Binding Note}">
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource Pill}" x:Name="Pill">
+                                            <TextBlock Text="{Binding SupportText}" FontSize="11" x:Name="PillText"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" x:Name="Name" TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsAvailable}" Value="True">
+                                            <Setter TargetName="Pill" Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                                            <Setter TargetName="Pill" Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
+                                            <Setter TargetName="PillText" Property="Foreground" Value="{DynamicResource AccentForegroundBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsAvailable}" Value="False">
+                                            <Setter TargetName="Name" Property="Opacity" Value="0.45"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Game profile -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock x:Name="ProfileHeader" Text="Game profile" Style="{StaticResource CardHeader}"/>
+                        <TextBlock Text="Display" Margin="0,0,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="DisplayBox" SelectionChanged="DisplayBox_SelectionChanged"/>
+                            <Button x:Name="DisplayApply" Grid.Column="1" Style="{StaticResource AccentButton}" Content="Apply" Margin="8,0,0,0"
+                                    Click="DisplayApply_Click" ToolTip="Writes PCSX2's settings for this game. The old files are backed up first."/>
+                        </Grid>
+                        <TextBlock x:Name="DisplayInfo" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                        <TextBlock x:Name="DisplayCurrent" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+
+                        <TextBlock Text="PCSX2 folder" Margin="0,12,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="Pcsx2FolderBox" LostFocus="Pcsx2FolderBox_LostFocus"
+                                     ToolTip="Found automatically while PCSX2 is running. For a portable install this is the folder with pcsx2-qt.exe."/>
+                            <Button Grid.Column="1" Padding="7,3" MinHeight="26" Margin="8,0,0,0" ToolTip="Choose the folder" Click="Pcsx2FolderBrowse_Click">
+                                <TextBlock Text="&#xE838;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
+                            </Button>
+                        </Grid>
+                        <TextBlock x:Name="DisplayError" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Foreground="{DynamicResource ErrorTextBrush}" Visibility="Collapsed"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Camera: FOV and seat -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Camera" Style="{StaticResource CardHeader}"/>
+                        <CheckBox x:Name="CameraEnabledBox" Content="FOV and seat hotkeys" Checked="CameraEnabled_Changed" Unchecked="CameraEnabled_Changed"
+                                  ToolTip="The keys only do this while PCSX2 has focus; everywhere else they work as normal."/>
+                        <TextBlock x:Name="CameraHeading" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                        <TextBlock x:Name="CameraDetail" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        <ItemsControl x:Name="CameraKeyList" Margin="0,12,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <DockPanel Margin="0,0,0,4">
+                                        <Button DockPanel.Dock="Right" MinWidth="138" Padding="8,2" MinHeight="26" Click="CameraKey_Click"
+                                                ToolTip="Click, then press the new keys (Ctrl or Alt plus a key). Esc cancels.">
+                                            <TextBlock Text="{Binding KeyText}" Style="{StaticResource MonoText}"/>
+                                        </Button>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Text="Hold Shift for bigger steps (5 cm). Changes are saved for each car and view, and put back the next time you drive it."/>
+                        <Button Content="Default keys" HorizontalAlignment="Left" Margin="0,10,0,0" Click="CameraDefaultKeys_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Connection -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <Ellipse x:Name="ConnDot" DockPanel.Dock="Right" Width="10" Height="10" VerticalAlignment="Center"
+                                     Fill="{DynamicResource ControlBorderStrongBrush}"/>
+                            <TextBlock Text="Connection" Style="{StaticResource CardHeader}" Margin="0" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <TextBlock x:Name="ConnSummary" FontWeight="SemiBold" Text="Not connected"/>
+                        <TextBlock x:Name="ConnDetail" Style="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                        <TextBlock x:Name="ConnError" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Foreground="{DynamicResource ErrorTextBrush}" Visibility="Collapsed"/>
+
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="PINE slot" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBox x:Name="SlotBox" Grid.Column="1" TextAlignment="Right" LostFocus="SlotBox_LostFocus"
+                                     ToolTip="PCSX2 → Settings → Advanced → PINE Settings → Slot. The default is 28011."/>
+                            <Button x:Name="ConnectButton" Grid.Column="2" HorizontalAlignment="Right" Content="Connect" Click="ConnectButton_Click"/>
+                        </Grid>
+                        <CheckBox x:Name="FastBox" Content="Fast snapshots from PCSX2 process memory" Margin="0,12,0,0"
+                                  Checked="FastBox_Changed" Unchecked="FastBox_Changed"
+                                  ToolTip="Copies all 32 MB of game RAM in a few milliseconds by reading PCSX2's EEmem export. PINE alone works too, but full snapshots take far longer."/>
+                        <TextBlock x:Name="FastNote" Style="{StaticResource SecondaryText}" Margin="26,2,0,0" Text="Used for scans only. Small reads and writes always use PINE."/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Voice (developer mode) -->
+                <Border x:Name="VoiceCard" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <Button DockPanel.Dock="Right" Padding="7,3" MinHeight="26" ToolTip="Test the voice" Click="VoiceTest_Click">
+                                <TextBlock Text="&#xE768;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
+                            </Button>
+                            <TextBlock Text="Voice" Style="{StaticResource CardHeader}" Margin="0" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <CheckBox x:Name="SpeakBox" Content="Speak instructions during captures" Checked="SpeakBox_Changed" Unchecked="SpeakBox_Changed"/>
+                        <ComboBox x:Name="VoiceBox" Margin="0,10,0,0" SelectionChanged="VoiceBox_SelectionChanged"/>
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" MinWidth="48"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Rate" VerticalAlignment="Center"/>
+                            <Slider x:Name="RateSlider" Grid.Column="1" Margin="10,0" Minimum="-5" Maximum="6" TickFrequency="1"
+                                    IsSnapToTickEnabled="True" ValueChanged="RateSlider_ValueChanged"/>
+                            <TextBlock x:Name="RateText" Grid.Column="2" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Style="{StaticResource SecondaryText}" Margin="0,8,0,0"
+                                   Text="A high beep means “watching now — hold it”. Two rising beeps mean the session is over."/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Address map (developer mode) -->
+                <Border x:Name="MapCard" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,10">
+                            <Button DockPanel.Dock="Right" Padding="7,3" MinHeight="26" ToolTip="Open the folder" Click="OpenMapFolder_Click">
+                                <TextBlock Text="&#xE838;" FontFamily="{StaticResource IconFont}" FontSize="12"/>
+                            </Button>
+                            <TextBlock Text="Address map" Style="{StaticResource CardHeader}" Margin="0" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <TextBlock x:Name="MapSummary" Style="{StaticResource SecondaryText}"/>
+                        <ItemsControl x:Name="MapList" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Margin="0,0,0,4" HorizontalContentAlignment="Stretch" Padding="8,3" Click="MapEntry_Click"
+                                            ToolTip="Add to the watch list">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="1" Style="{StaticResource MonoText}" Margin="8,0" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                                <Run Text="{Binding Address, Mode=OneWay}"/> <Run Text="{Binding Type, Mode=OneWay}"/>
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="2" Text="{Binding Status}" FontSize="11" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Main card -->
+        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Card}" Margin="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Tabs only show in developer mode (launch with the dev switch); end users just get telemetry. -->
+                <StackPanel x:Name="NavBar" Orientation="Horizontal" Margin="0,0,0,14">
+                    <RadioButton x:Name="TabTelemetry" Style="{StaticResource NavTab}" Content="Telemetry" GroupName="Nav" IsChecked="True" Checked="Tab_Checked"/>
+                    <RadioButton x:Name="TabCapture" Style="{StaticResource NavTab}" Content="Guided capture" GroupName="Nav" Checked="Tab_Checked"/>
+                    <RadioButton x:Name="TabScanner" Style="{StaticResource NavTab}" Content="Scanner" GroupName="Nav" Checked="Tab_Checked"/>
+                    <RadioButton x:Name="TabWatch" Style="{StaticResource NavTab}" Content="Watch list" GroupName="Nav" Checked="Tab_Checked"/>
+                    <RadioButton x:Name="TabMemory" Style="{StaticResource NavTab}" Content="Memory" GroupName="Nav" Checked="Tab_Checked"/>
+                </StackPanel>
+
+                <Grid Grid.Row="1">
+                    <views:TelemetryView x:Name="TelemetryView"/>
+                    <views:CaptureView x:Name="CaptureView" Visibility="Collapsed"/>
+                    <views:ScannerView x:Name="ScannerView" Visibility="Collapsed"/>
+                    <views:WatchView x:Name="WatchView" Visibility="Collapsed"/>
+                    <views:MemoryView x:Name="MemoryView" Visibility="Collapsed"/>
+                </Grid>
+
+                <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardBorderBrush}" Padding="0,12,0,0" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock x:Name="StatusText" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="HintText" Style="{StaticResource SecondaryText}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,16 @@
+{
+  "id": "brake",
+  "name": "Brake",
+  "description": "Finds the brake input. Car stopped; alternates release, full and half brake.",
+  "setup": "Stop the car anywhere safe. Keep off the throttle.",
+  "intro": "Brake. Stay stopped and keep off the throttle. I'll call release, full, or half brake.",
+  "types": ["u8", "u16", "u32", "f32"],
+  "steps": [
+    { "say": "Release the brake.", "settle": 2.0, "sample": 1.5, "label": 0 },
+    { "say": "Full brake.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Release.", "settle": 2.0, "sample": 1.5, "label": 0 },
+    { "say": "Half brake, and hold it steady.", "settle": 2.0, "sample": 1.5, "label": 0.5, "expect": "any" },
+    { "say": "Full brake.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Release.", "settle": 2.0, "sample": 1.5, "label": 0 }
+  ]
+}

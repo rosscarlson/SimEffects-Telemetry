@@ -1,0 +1,15 @@
+{
+  // RPM drops on each upshift, so the "rising through the gears" step separates speed from RPM.
+  "id": "speed",
+  "name": "Speed",
+  "description": "Finds vehicle speed: stopped, accelerate through the gears, brake to a stop.",
+  "setup": "Stopped at the start of a long straight.",
+  "intro": "Speed. Start stopped. When I say go, accelerate hard and shift up as normal, then brake to a stop when I say.",
+  "types": ["u16", "u32", "f32"],
+  "steps": [
+    { "say": "Stay stopped, foot on the brake.", "settle": 1.0, "sample": 1.5, "label": 0, "toleranceAbs": 0.05 },
+    { "say": "Go! Full throttle, shift up as normal.", "settle": 0.8, "sample": 6.0, "expect": "rising", "tolerance": 0.01 },
+    { "say": "Brake hard to a full stop.", "settle": 0.3, "sample": 3.0, "expect": "falling", "tolerance": 0.01 },
+    { "say": "Stay stopped.", "settle": 2.0, "sample": 1.5, "label": 0, "toleranceAbs": 0.05 }
+  ]
+}

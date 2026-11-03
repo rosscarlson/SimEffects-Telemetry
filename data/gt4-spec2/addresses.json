@@ -1,0 +1,161 @@
+{
+  "game": "Gran Turismo 4 Spec II",
+  "entries": [
+    {
+      "name": "throttle",
+      "address": "0x01E67C38",
+      "type": "u16",
+      "status": "confirmed",
+      "units": "1/4096",
+      "notes": "Fixed point 0-4096. Likely the car/physics struct (high RAM). Moves with the pad value.",
+      "source": "throttle session 2026-11-02",
+      "updated": "2026-11-02T23:51:11.2425342-05:00",
+      "addressValue": 31882296,
+      "kind": "u16"
+    },
+    {
+      "name": "throttle_input",
+      "address": "0x006819F8",
+      "type": "u8",
+      "status": "confirmed",
+      "units": "1/255",
+      "notes": "Raw pedal 0-255. Mirrors at 0x01E67B8A (u8) and 0x0068992E (u16, 0-65535).",
+      "source": "throttle session 2026-11-02",
+      "updated": "2026-11-02T23:51:11.3335667-05:00",
+      "addressValue": 6822392,
+      "kind": "u8"
+    },
+    {
+      "name": "brake",
+      "address": "0x01E67C3A",
+      "type": "u16",
+      "status": "confirmed",
+      "units": "1/4096",
+      "notes": "Fixed point 0-4096, next to throttle (0x01E67C38).",
+      "source": "brake session 2026-11-02",
+      "updated": "2026-11-02T23:52:40.5009591-05:00",
+      "addressValue": 31882298,
+      "kind": "u16"
+    },
+    {
+      "name": "brake_input",
+      "address": "0x006819FC",
+      "type": "u8",
+      "status": "confirmed",
+      "units": "1/255",
+      "notes": "Raw pedal 0-255, next to throttle_input. Mirror 0x01E67B8C.",
+      "source": "brake session 2026-11-02",
+      "updated": "2026-11-02T23:52:40.5908535-05:00",
+      "addressValue": 6822396,
+      "kind": "u8"
+    },
+    {
+      "name": "brake_f32",
+      "address": "0x01E62770",
+      "type": "f32",
+      "status": "confirmed",
+      "units": null,
+      "notes": "Normalised 0-1. Also at 0x01E6EC00.",
+      "source": "brake session 2026-11-02",
+      "updated": "2026-11-02T23:52:40.6854579-05:00",
+      "addressValue": 31860592,
+      "kind": "f32"
+    },
+    {
+      "name": "steering",
+      "address": "0x01E67C34",
+      "type": "s16",
+      "status": "confirmed",
+      "units": "1/4096",
+      "notes": "Fixed point \u002B-4096, LEFT positive. Car input block with throttle/brake.",
+      "source": "steering session 2026-11-02",
+      "updated": "2026-11-02T23:53:56.8624147-05:00",
+      "addressValue": 31882292,
+      "kind": "s16"
+    },
+    {
+      "name": "steering_input",
+      "address": "0x006819E0",
+      "type": "s32",
+      "status": "confirmed",
+      "units": null,
+      "notes": "Raw pad \u002B-8192, right positive. Mirror 0x01E67B88.",
+      "source": "steering session 2026-11-02",
+      "updated": "2026-11-02T23:53:56.953025-05:00",
+      "addressValue": 6822368,
+      "kind": "s32"
+    },
+    {
+      "name": "steering_norm",
+      "address": "0x01E6F04C",
+      "type": "f32",
+      "status": "confirmed",
+      "units": null,
+      "notes": "0 full left, 0.5 centre, 1 full right. Also 0x01E6EF5C.",
+      "source": "steering session 2026-11-02",
+      "updated": "2026-11-02T23:53:57.0411635-05:00",
+      "addressValue": 31912012,
+      "kind": "f32"
+    },
+    {
+      "name": "steer_angle",
+      "address": "0x01E6E694",
+      "type": "f32",
+      "status": "confirmed",
+      "units": "rad",
+      "notes": "Front wheel angle, \u002B-0.6981 = 40 deg, left positive. Also 0x01E6EBDC, 0x01E6EDE4.",
+      "source": "steering session 2026-11-02",
+      "updated": "2026-11-02T23:53:57.1289765-05:00",
+      "addressValue": 31909524,
+      "kind": "f32"
+    },
+    {
+      "name": "speed_mph",
+      "address": "0x01E627D0",
+      "type": "f32",
+      "status": "confirmed",
+      "units": "mph",
+      "notes": "Matches HUD speedometer (30 on HUD = 30.5).",
+      "source": "speed session \u002B HUD screenshot 2026-11-02",
+      "updated": "2026-11-02T23:55:59.7271462-05:00",
+      "addressValue": 31860688,
+      "kind": "f32"
+    },
+    {
+      "name": "speed",
+      "address": "0x01E6EDC0",
+      "type": "f32",
+      "status": "confirmed",
+      "units": "m/s",
+      "notes": "= speed_mph / 2.237. Magnitude of velocity pair at 0x01E6ECB8/0x01E6ECBC.",
+      "source": "speed session 2026-11-02",
+      "updated": "2026-11-02T23:55:59.8164833-05:00",
+      "addressValue": 31911360,
+      "kind": "f32"
+    },
+    {
+      "name": "rpm",
+      "address": "0x01E6282C",
+      "type": "f32",
+      "status": "confirmed",
+      "units": "rpm",
+      "notes": "Idle 799, limiter ~7540. Next to speed_mph (dash struct?). Also 0x01E6EDA4.",
+      "source": "rpm session 2026-11-02",
+      "updated": "2026-11-02T23:57:09.5913337-05:00",
+      "addressValue": 31860780,
+      "kind": "f32"
+    },
+    {
+      "name": "gear",
+      "address": "0x01E63188",
+      "type": "u8",
+      "status": "confirmed",
+      "units": null,
+      "notes": "Exact gear number. 0x01E63189 matched too (maybe target/display gear). Copy at 0x01E6EC94.",
+      "source": "gear session 2026-11-02",
+      "updated": "2026-11-02T23:59:56.3438873-05:00",
+      "addressValue": 31863176,
+      "kind": "u8"
+    }
+  ]
+}

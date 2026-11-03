@@ -1,0 +1,16 @@
+{
+  "id": "clutch",
+  "name": "Clutch",
+  "description": "Finds the clutch input (only if the clutch pedal is mapped in game). Car stopped.",
+  "setup": "Stop the car. Clutch pedal must be mapped in the controller settings.",
+  "intro": "Clutch. Stay stopped. I'll call release, full, or half clutch.",
+  "types": ["u8", "u16", "u32", "f32"],
+  "steps": [
+    { "say": "Release the clutch.", "settle": 2.0, "sample": 1.5, "label": 0 },
+    { "say": "Clutch fully in.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Release.", "settle": 2.0, "sample": 1.5, "label": 0 },
+    { "say": "Half clutch, and hold it.", "settle": 2.0, "sample": 1.5, "label": 0.5, "tolerance": 0.15 },
+    { "say": "Clutch fully in.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Release.", "settle": 2.0, "sample": 1.5, "label": 0 }
+  ]
+}

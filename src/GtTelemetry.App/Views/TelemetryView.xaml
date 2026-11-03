@@ -1,0 +1,108 @@
+<UserControl x:Class="GtTelemetry.App.Views.TelemetryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="Tile" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ControlBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="Margin" Value="0,0,12,12"/>
+        </Style>
+        <Style x:Key="TileLabel" TargetType="TextBlock" BasedOn="{StaticResource SecondaryText}">
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="TileValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title + primary action -->
+        <DockPanel>
+            <Button x:Name="StartButton" DockPanel.Dock="Right" Style="{StaticResource AccentButton}" MinWidth="136" MinHeight="42"
+                    VerticalAlignment="Top" Click="StartButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="StartIcon" FontFamily="{StaticResource IconFont}" Text="&#xE768;" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock x:Name="StartLabel" Text="Start streaming" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <StackPanel>
+                <TextBlock Text="Telemetry output" FontSize="18" FontWeight="SemiBold"/>
+                <TextBlock Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="Sends Forza Data Out packets over UDP. In SimHub, pick Forza Horizon 4 (Horizon format) or Forza Motorsport 7 (Dash) and set the same port."/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Settings -->
+        <WrapPanel Grid.Row="1" Margin="0,16,0,16" Orientation="Horizontal">
+            <StackPanel Margin="0,0,16,8">
+                <TextBlock Text="Address" Margin="0,0,0,6"/>
+                <TextBox x:Name="HostBox" Width="150" LostFocus="Setting_Changed"
+                         ToolTip="127.0.0.1 for SimHub on this PC, or another PC's IP address."/>
+            </StackPanel>
+            <StackPanel Margin="0,0,16,8">
+                <TextBlock Text="Port" Margin="0,0,0,6"/>
+                <TextBox x:Name="PortBox" Width="80" TextAlignment="Right" LostFocus="Setting_Changed"/>
+            </StackPanel>
+            <StackPanel Margin="0,0,16,8">
+                <TextBlock Text="Format" Margin="0,0,0,6"/>
+                <ComboBox x:Name="FormatBox" Width="190" SelectionChanged="Setting_Changed">
+                    <ComboBoxItem Content="Forza Horizon (324 bytes)" Tag="Horizon"/>
+                    <ComboBoxItem Content="Forza Motorsport Dash (311 bytes)" Tag="Dash"/>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Margin="0,0,16,8">
+                <TextBlock Text="Rate" Margin="0,0,0,6"/>
+                <ComboBox x:Name="RateBox" Width="100" SelectionChanged="Setting_Changed">
+                    <ComboBoxItem Content="30 Hz" Tag="30"/>
+                    <ComboBoxItem Content="60 Hz" Tag="60"/>
+                </ComboBox>
+            </StackPanel>
+            <CheckBox x:Name="AutoStartBox" Content="Start streaming when the app opens" VerticalAlignment="Bottom" Margin="0,0,0,14"
+                      Checked="AutoStart_Changed" Unchecked="AutoStart_Changed"/>
+        </WrapPanel>
+
+        <!-- Live values -->
+        <Border Grid.Row="2" Background="{DynamicResource RoomBrush}" CornerRadius="8" Padding="16,16,4,4">
+            <StackPanel>
+                <DockPanel Margin="0,0,12,14">
+                    <Ellipse x:Name="StateDot" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0"
+                             Fill="{DynamicResource ControlBorderStrongBrush}"/>
+                    <TextBlock x:Name="StateText" FontWeight="SemiBold" Text="Not streaming"/>
+                    <TextBlock x:Name="RateText" Style="{StaticResource SecondaryText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </DockPanel>
+                <WrapPanel>
+                    <Border Style="{StaticResource Tile}" Width="150">
+                        <StackPanel><TextBlock Text="Speed" Style="{StaticResource TileLabel}"/><TextBlock x:Name="SpeedText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Tile}" Width="150">
+                        <StackPanel><TextBlock Text="RPM" Style="{StaticResource TileLabel}"/><TextBlock x:Name="RpmText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Tile}" Width="100">
+                        <StackPanel><TextBlock Text="Gear" Style="{StaticResource TileLabel}"/><TextBlock x:Name="GearText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Tile}" Width="120">
+                        <StackPanel><TextBlock Text="Throttle" Style="{StaticResource TileLabel}"/><TextBlock x:Name="ThrottleText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Tile}" Width="120">
+                        <StackPanel><TextBlock Text="Brake" Style="{StaticResource TileLabel}"/><TextBlock x:Name="BrakeText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Tile}" Width="150">
+                        <StackPanel><TextBlock Text="Lateral g" Style="{StaticResource TileLabel}"/><TextBlock x:Name="LatGText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Tile}" Width="150">
+                        <StackPanel><TextBlock Text="Surface" Style="{StaticResource TileLabel}"/><TextBlock x:Name="SurfaceText" Text="—" Style="{StaticResource TileValue}"/></StackPanel>
+                    </Border>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

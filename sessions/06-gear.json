@@ -1,0 +1,17 @@
+{
+  "id": "gear",
+  "name": "Gear",
+  "description": "Finds the current gear. Shift on cue while driving gently.",
+  "setup": "Manual transmission. Driving slowly in first gear with room ahead.",
+  "intro": "Gears. Drive gently. I'll call a gear; shift to it and stay in it.",
+  "types": ["u8", "s8", "u16", "u32", "f32"],
+  "steps": [
+    { "say": "First gear.", "settle": 2.5, "sample": 1.5, "label": 1, "tolerance": 0 },
+    { "say": "Second.", "settle": 2.5, "sample": 1.5, "label": 2, "tolerance": 0 },
+    { "say": "Third.", "settle": 2.5, "sample": 1.5, "label": 3, "tolerance": 0 },
+    { "say": "Back to second.", "settle": 2.5, "sample": 1.5, "label": 2, "tolerance": 0 },
+    { "say": "Fourth.", "settle": 2.5, "sample": 1.5, "label": 4, "tolerance": 0 },
+    { "say": "Third.", "settle": 2.5, "sample": 1.5, "label": 3, "tolerance": 0 },
+    { "say": "Second.", "settle": 2.5, "sample": 1.5, "label": 2, "tolerance": 0 }
+  ]
+}

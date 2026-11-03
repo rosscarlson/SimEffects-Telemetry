@@ -1,0 +1,21 @@
+{
+  // For `gtt record surfaces --range 0x01E6E790-0x01E6EAC0`: identifies the per-wheel surface codes (wheel byte +0xA9).
+  "id": "surfaces",
+  "name": "Surfaces (record)",
+  "description": "Kerbs, grass and gravel on cue, to name the surface codes.",
+  "setup": "Driving at a steady pace, with kerbs and grass or gravel coming up.",
+  "intro": "Surfaces. Keep driving, and do each thing as I call it.",
+  "outro": "Surfaces done. Thanks.",
+  "types": ["u8"],
+  "steps": [
+    { "say": "Drive normally on the track.", "sample": 6, "label": 1 },
+    { "say": "Put the left wheels on a kerb, and keep them there.", "sample": 10, "label": 2 },
+    { "say": "Back on the track.", "sample": 4, "label": 3 },
+    { "say": "Now the right wheels on a kerb.", "sample": 10, "label": 4 },
+    { "say": "Back on the track.", "sample": 4, "label": 5 },
+    { "say": "Put all four wheels on the grass.", "sample": 8, "label": 6 },
+    { "say": "Back on the track.", "sample": 5, "label": 7 },
+    { "say": "Gravel or sand if you can find some, otherwise just drive.", "sample": 10, "label": 8 },
+    { "say": "Back on the track.", "sample": 5, "label": 9 }
+  ]
+}

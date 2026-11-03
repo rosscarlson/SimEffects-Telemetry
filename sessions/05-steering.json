@@ -1,0 +1,16 @@
+{
+  "id": "steering",
+  "name": "Steering",
+  "description": "Finds the steering input. Car stopped; centre, full lock each way, half right.",
+  "setup": "Stop the car. Pedals released.",
+  "intro": "Steering. Stay stopped. I'll call centre, full left, full right, or half right. Hold each one.",
+  "types": ["u8", "s8", "u16", "s16", "s32", "f32"],
+  "steps": [
+    { "say": "Centre the wheel.", "settle": 2.0, "sample": 1.5, "label": 0, "toleranceAbs": 0.01 },
+    { "say": "Full left lock.", "settle": 2.0, "sample": 1.5, "label": -1, "tolerance": 0.04 },
+    { "say": "Centre.", "settle": 2.0, "sample": 1.5, "label": 0, "toleranceAbs": 0.01 },
+    { "say": "Half right, and hold it.", "settle": 2.0, "sample": 1.5, "label": 0.5, "tolerance": 0.15 },
+    { "say": "Full right lock.", "settle": 2.0, "sample": 1.5, "label": 1, "tolerance": 0.04 },
+    { "say": "Centre.", "settle": 2.0, "sample": 1.5, "label": 0, "toleranceAbs": 0.01 }
+  ]
+}

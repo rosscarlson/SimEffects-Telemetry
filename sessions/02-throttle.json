@@ -1,0 +1,16 @@
+{
+  "id": "throttle",
+  "name": "Throttle",
+  "description": "Finds the throttle input. Alternates lift, full and half throttle while driving.",
+  "setup": "Driving slowly at the start of a long straight. Don't touch the brake during this one.",
+  "intro": "Throttle. I'll call lift, full, or half throttle. Keep it steady after each call. Don't touch the brake.",
+  "types": ["u8", "u16", "u32", "f32"],
+  "steps": [
+    { "say": "Lift off the throttle completely.", "settle": 2.0, "sample": 1.5, "label": 0 },
+    { "say": "Full throttle.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Lift off.", "settle": 2.0, "sample": 1.5, "label": 0 },
+    { "say": "Half throttle, and hold it steady.", "settle": 2.0, "sample": 1.5, "label": 0.5, "expect": "any" },
+    { "say": "Full throttle.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Lift off.", "settle": 2.0, "sample": 1.5, "label": 0 }
+  ]
+}

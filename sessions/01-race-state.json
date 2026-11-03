@@ -1,0 +1,16 @@
+{
+  // Warm-up session: quick, low effort, and proves the whole loop works end to end.
+  "id": "race-state",
+  "name": "Race state (pause)",
+  "description": "Finds the paused/running flag. Pause and unpause on cue.",
+  "setup": "In a race, car anywhere on track. Hands near the pause button.",
+  "intro": "Race state. I'll ask you to pause and unpause the game a few times.",
+  "types": ["u8", "u16", "u32"],
+  "steps": [
+    { "say": "Make sure the game is running, not paused.", "settle": 1.5, "sample": 1.5, "label": 0 },
+    { "say": "Pause the game.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "Unpause.", "settle": 2.0, "sample": 1.5, "label": 0, "expect": "any" },
+    { "say": "Pause again.", "settle": 2.0, "sample": 1.5, "label": 1 },
+    { "say": "And unpause.", "settle": 2.0, "sample": 1.5, "label": 0, "expect": "any" }
+  ]
+}

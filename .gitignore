@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+captures/
+publish/
+# Throwaway analysis scripts, RAM snapshots and screenshots from discovery sessions.
+tools/scratch/

@@ -1,0 +1,15 @@
+{
+  "id": "rpm",
+  "name": "Engine RPM",
+  "description": "Finds engine RPM: idle, rev to the limiter in first, back to idle.",
+  "setup": "Stopped, first gear, foot off the throttle.",
+  "intro": "Engine RPM. Start stopped in first gear. I'll ask you to floor it to the rev limiter, then come back to a stop.",
+  "types": ["u16", "u32", "f32"],
+  "steps": [
+    { "say": "Idle. Stay stopped, foot off the throttle.", "settle": 1.0, "sample": 1.5, "label": 0, "tolerance": 0.05 },
+    { "say": "Floor it in first, and hold it on the limiter.", "settle": 0.3, "sample": 1.2, "expect": "rising", "tolerance": 0.03 },
+    { "say": "Keep it on the limiter.", "settle": 0.5, "sample": 1.5, "label": 2, "tolerance": 0.08 },
+    { "say": "Lift off and brake to a stop. Stay in first or neutral.", "settle": 4.0, "sample": 1.0, "expect": "any" },
+    { "say": "Idle. Stay stopped.", "settle": 1.5, "sample": 1.5, "label": 0, "tolerance": 0.05 }
+  ]
+}

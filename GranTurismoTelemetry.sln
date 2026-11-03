@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DE6F30EF-689D-4FE5-87F7-E85BD541D22A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GtTelemetry.Core", "src\GtTelemetry.Core\GtTelemetry.Core.csproj", "{583192C6-C077-4A04-B304-37FB54873C9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GtTelemetry.Cli", "src\GtTelemetry.Cli\GtTelemetry.Cli.csproj", "{B879D21D-FBBB-4EF4-9FD9-29FB7D2A8929}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GtTelemetry.App", "src\GtTelemetry.App\GtTelemetry.App.csproj", "{7CA0B8A8-9946-4929-9FAF-8C7322E50F8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{583192C6-C077-4A04-B304-37FB54873C9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{583192C6-C077-4A04-B304-37FB54873C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{583192C6-C077-4A04-B304-37FB54873C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{583192C6-C077-4A04-B304-37FB54873C9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B879D21D-FBBB-4EF4-9FD9-29FB7D2A8929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B879D21D-FBBB-4EF4-9FD9-29FB7D2A8929}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B879D21D-FBBB-4EF4-9FD9-29FB7D2A8929}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B879D21D-FBBB-4EF4-9FD9-29FB7D2A8929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CA0B8A8-9946-4929-9FAF-8C7322E50F8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CA0B8A8-9946-4929-9FAF-8C7322E50F8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CA0B8A8-9946-4929-9FAF-8C7322E50F8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CA0B8A8-9946-4929-9FAF-8C7322E50F8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{583192C6-C077-4A04-B304-37FB54873C9B} = {DE6F30EF-689D-4FE5-87F7-E85BD541D22A}
+		{B879D21D-FBBB-4EF4-9FD9-29FB7D2A8929} = {DE6F30EF-689D-4FE5-87F7-E85BD541D22A}
+		{7CA0B8A8-9946-4929-9FAF-8C7322E50F8D} = {DE6F30EF-689D-4FE5-87F7-E85BD541D22A}
+	EndGlobalSection
+EndGlobal

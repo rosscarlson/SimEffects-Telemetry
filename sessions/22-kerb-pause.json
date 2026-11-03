@@ -1,0 +1,14 @@
+{
+  // For `gtt record kerb-pause --range car`: free driving; each time the driver is on a kerb they pause the game, and the
+  // last second before each pause (the frame counter stops) is the kerb sample.
+  "id": "kerb-pause",
+  "name": "Kerbs by pausing (record)",
+  "description": "Drive to kerbs at your own pace and pause the game while on each one.",
+  "setup": "In a race, any track.",
+  "intro": "Recording. Take your time.",
+  "outro": "Recording finished.",
+  "types": ["u8"],
+  "steps": [
+    { "say": "Find a kerb. Pause while you're on it.", "sample": 1200, "label": 1 }
+  ]
+}
