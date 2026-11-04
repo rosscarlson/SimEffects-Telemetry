@@ -77,12 +77,13 @@ public static class Gt6Display
     /// config, as RPCS3's own "Create custom configuration" does. Either way RPCS3's database fixes for the game go in,
     /// since RPCS3 stops applying them once a custom config exists. RPCS3 reads it when the game boots.
     /// </summary>
-    public static DisplayApplyResult ApplyConfig(string rpcs3Folder, string titleId, Ps3DisplayMode mode)
+    public static DisplayApplyResult ApplyConfig(string rpcs3Folder, string titleId, Ps3DisplayMode mode,
+                                                 IReadOnlyList<(string Section, string Key, string Value)>? knownFixes = null)
     {
         var path = ConfigPath(rpcs3Folder, titleId);
         var old = File.Exists(path) ? File.ReadAllText(path) : null;
         var text = old ?? File.ReadAllText(Path.Combine(rpcs3Folder, "config", "config.yml"));
-        foreach (var (section, key, value) in DatabaseFixes(rpcs3Folder, titleId))
+        foreach (var (section, key, value) in DatabaseFixes(rpcs3Folder, titleId, knownFixes))
             text = YamlLines.Set(text, [section, key], value);
         text = YamlLines.Set(text, ["Video", StretchKey], mode.Id == "16:9" ? "false" : "true");
 
@@ -91,22 +92,26 @@ public static class Gt6Display
         if (text != old)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            if (old != null)
-            {
-                var backup = $"{path}.bak-{DateTime.Now:yyyyMMdd-HHmmss}";
-                for (int i = 2; File.Exists(backup); i++) backup = $"{path}.bak-{DateTime.Now:yyyyMMdd-HHmmss}-{i}";
-                File.Copy(path, backup);
-                backups.Add(backup);
-            }
+            if (old != null) backups.Add(Backup(path));
             File.WriteAllText(path, text);
             changed.Add(path);
         }
         return new DisplayApplyResult(changed, backups);
     }
 
-    /// <summary>The game's settings from RPCS3's config database (GuiConfigs\config_database.dat), or the known GT6 fixes
-    /// if it can't be read. List values (library overrides) are left out.</summary>
-    public static IReadOnlyList<(string Section, string Key, string Value)> DatabaseFixes(string rpcs3Folder, string titleId)
+    /// <summary>Copies <paramref name="path"/> to path.bak-date next to it and returns the copy's path.</summary>
+    public static string Backup(string path)
+    {
+        var backup = $"{path}.bak-{DateTime.Now:yyyyMMdd-HHmmss}";
+        for (int i = 2; File.Exists(backup); i++) backup = $"{path}.bak-{DateTime.Now:yyyyMMdd-HHmmss}-{i}";
+        File.Copy(path, backup);
+        return backup;
+    }
+
+    /// <summary>The game's settings from RPCS3's config database (GuiConfigs\config_database.dat), or
+    /// <paramref name="knownFixes"/> (GT6's by default) if it can't be read. List values (library overrides) are left out.</summary>
+    public static IReadOnlyList<(string Section, string Key, string Value)> DatabaseFixes(string rpcs3Folder, string titleId,
+        IReadOnlyList<(string Section, string Key, string Value)>? knownFixes = null)
     {
         try
         {
@@ -119,7 +124,7 @@ public static class Gt6Display
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or KeyNotFoundException or InvalidOperationException)
         {
-            return KnownFixes;
+            return knownFixes ?? KnownFixes;
         }
     }
 }

@@ -101,7 +101,7 @@ public sealed record Ps3CarLayout
     public static readonly Ps3CarLayout Gt5 = new()
     {
         Game = "GT5",
-        Version = "pre-2.11",   // not recorded; 2.11 was installed 2026-11-04 and hasn't been checked yet
+        Version = "pre-2.11",   // not recorded
         BlockSize = 0xB00,
         Wheel0 = 0xCC,
         WheelStride = 0x14C,
@@ -125,7 +125,15 @@ public sealed record Ps3CarLayout
         },
     };
 
-    private static readonly Ps3CarLayout[] Gt5Versions = [Gt5];
+    /// <summary>GT5 2.11, checked 2026-11-04 with the car block at 0x42447280: only the gear moved, 4 bytes on (the byte
+    /// after it flags a shift in progress).</summary>
+    public static readonly Ps3CarLayout Gt5v211 = Gt5 with
+    {
+        Version = "2.11",
+        Gear = 0x740,
+    };
+
+    private static readonly Ps3CarLayout[] Gt5Versions = [Gt5v211, Gt5];
 }
 
 /// <summary>

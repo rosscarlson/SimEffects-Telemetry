@@ -122,10 +122,12 @@ internal static class SelfTest
 
         failures += DisplayChecks();
         failures += Gt6DisplayChecks();
+        failures += Gt5DisplayChecks();
         failures += CameraChecks();
         failures += Ps3Checks(Ps3CarLayout.Gt6);
         failures += Ps3Checks(Ps3CarLayout.Gt6v105);
         failures += Ps3Checks(Ps3CarLayout.Gt5);
+        failures += Ps3Checks(Ps3CarLayout.Gt5v211);
 
         Console.WriteLine(failures == 0 ? "All checks passed." : $"{failures} check(s) failed.");
         return failures == 0 ? 0 : 1;
@@ -417,6 +419,53 @@ internal static class SelfTest
                 ("no block", empty == null),
             };
             Console.WriteLine("gt6 display " + string.Join("  ", checks.Select(e => (e.Ok ? "ok " : "FAIL ") + e.What)));
+            return checks.Count(e => !e.Ok);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    /// <summary>GT5 display: the patch turned on with each mode's value in patch_config.yml next to another patch, read
+    /// back, turned off for 16:9, and a patch_config.yml made from nothing.</summary>
+    private static int Gt5DisplayChecks()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "gtt-selftest-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(dir, "config"));
+            File.WriteAllText(Path.Combine(dir, "config", "config.yml"), "Core:\n  SPU Block Size: Safe\nVideo:\n  Stretch To Display Area: false\n");
+            const string hash = "PPU-d73f342bf28ee016ef3d0ccb309b1acb03d8ecce";
+            const string other = hash + ":\n  Unlock FPS:\n    Gran Turismo 5:\n      BCUS98114:\n        02.11:\n          Enabled: true\n";
+            var patchConfig = Core.Display.Gt5Display.PatchConfigPath(dir);
+            var modes = Core.Display.Gt5Display.Modes;
+
+            var fresh = Core.Display.Gt5Display.Apply(dir, "BCUS98114", modes[2]);
+            var made = File.ReadAllText(patchConfig);
+            var config = File.ReadAllText(Core.Display.Gt6Display.ConfigPath(dir, "BCUS98114"));
+            File.WriteAllText(patchConfig, other);
+            Core.Display.Gt5Display.Apply(dir, "BCUS98114", modes[1]);
+            var wide = File.ReadAllText(patchConfig);
+            var read21 = Core.Display.Gt5Display.ReadMode(dir, "BCUS98114").Id;
+            var same = Core.Display.Gt5Display.Apply(dir, "BCUS98114", modes[1]);
+            Core.Display.Gt5Display.Apply(dir, "BCUS98114", modes[0]);
+            var off = File.ReadAllText(patchConfig);
+            var read169 = Core.Display.Gt5Display.ReadMode(dir, "BCUS98114").Id;
+
+            const string ar = "  Aspect Ratio:\n    Gran Turismo 5:\n      BCUS98114:\n        02.11:\n          Enabled: true\n"
+                            + "          Configurable Values:\n            Aspect Ratio: ";
+            var checks = new (string What, bool Ok)[]
+            {
+                ("new file", made == hash + ":\n" + ar + "3.555555555555556\n" && fresh.Backups.Count == 0),
+                ("gt5 config", config.Contains("SPU Block Size: Mega") && config.Contains("Stretch To Display Area: true")
+                               && config.Contains("Disable Blit Engine Upscaling: true")),
+                ("21:9 patch", wide == other + ar + "2.388888888888889\n" && read21 == "21:9"),
+                ("21:9 same", same.Changed.Count == 0),
+                ("16:9 off", off == other + ar.Replace("Enabled: true\n          Configurable", "Enabled: false\n          Configurable") + "2.388888888888889\n"
+                             && read169 == "16:9"),
+            };
+            Console.WriteLine("gt5 display " + string.Join("  ", checks.Select(e => (e.Ok ? "ok " : "FAIL ") + e.What)));
             return checks.Count(e => !e.Ok);
         }
         finally

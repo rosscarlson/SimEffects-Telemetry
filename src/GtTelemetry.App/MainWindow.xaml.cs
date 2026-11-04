@@ -24,7 +24,8 @@ public partial class MainWindow : Window
     private string? pcsx2Data;
     private DisplayState? displayState;
     private string? rpcs3Folder;
-    private bool gt6Stretch;
+    private string? ps3Applied;
+    private bool ps3Stretch;
     private Gt6AspectWriter? aspectWriter;
     private bool aspectBusy;
     private readonly IAppView[] views;
@@ -176,7 +177,7 @@ public partial class MainWindow : Window
             string.IsNullOrEmpty(f.Note) ? f.Support.ToString() : f.Note)).ToList();
         // The display card is hidden for games without display patches; the feature list above says what's planned.
         // Azimuth's render size is on the Telemetry tab instead (Render Aspect Ratio).
-        ProfileCard.Visibility = a.SupportOf(Feature.DisplayPatches) == Support.Available && (a.Source == MemorySourceKind.Pcsx2Pine || a == AdapterCatalog.Gt6) ? Visibility.Visible : Visibility.Collapsed;
+        ProfileCard.Visibility = a.SupportOf(Feature.DisplayPatches) == Support.Available && (a.Source == MemorySourceKind.Pcsx2Pine || a == AdapterCatalog.Gt5 || a == AdapterCatalog.Gt6) ? Visibility.Visible : Visibility.Collapsed;
         // The camera bindings are shared by every game, so the card stays; it's greyed out for games without camera control.
         CameraCard.IsEnabled = a.SupportOf(Feature.CameraControl) == Support.Available;
         CameraCard.Opacity = CameraCard.IsEnabled ? 1 : 0.5;
@@ -193,12 +194,18 @@ public partial class MainWindow : Window
 
     private bool IsGt6 => state.Adapter == AdapterCatalog.Gt6;
 
-    /// <summary>GT6's title ID for its RPCS3 config: the running one, else the US disc.</summary>
-    private string Gt6TitleId => state.Game?.Id is { } id && AdapterCatalog.Gt6.Matches(id) ? id : AdapterCatalog.Gt6.GameIds[0];
+    /// <summary>GT5 and GT6: display modes through RPCS3's files (and GT6's memory).</summary>
+    private bool IsRpcs3Game => IsGt6 || state.Adapter == AdapterCatalog.Gt5;
 
-    private bool Gt6Running => state.Rpcs3.IsConnected && state.Game?.Id is { } id && AdapterCatalog.Gt6.Matches(id);
+    /// <summary>The game's title ID for its RPCS3 config: the running one, else the US disc.</summary>
+    private string Ps3TitleId => state.Game?.Id is { } id && state.Adapter.Matches(id) ? id : state.Adapter.GameIds[0];
 
-    /// <summary>Reads the display mode back: from PCSX2's files for GT4 Spec II, from the saved choice and RPCS3's config for GT6.</summary>
+    private bool Ps3Running => state.Rpcs3.IsConnected && state.Game?.Id is { } id && state.Adapter.Matches(id);
+
+    private bool Gt6Running => IsGt6 && Ps3Running;
+
+    /// <summary>Reads the display mode back: from PCSX2's files for GT4 Spec II, from RPCS3's files (and for GT6 the saved
+    /// choice) for GT5 and GT6.</summary>
     private void RefreshDisplay()
     {
         var a = state.Adapter;
@@ -216,9 +223,9 @@ public partial class MainWindow : Window
                 DisplayBox.ItemsSource = null;
                 return;
             }
-            if (IsGt6)
+            if (IsRpcs3Game)
             {
-                RefreshGt6Display();
+                RefreshPs3Display();
                 return;
             }
             FolderLabel.Text = "PCSX2 folder";
@@ -246,7 +253,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            ShowDisplayError($"Couldn't read {(IsGt6 ? "RPCS3" : "PCSX2")}'s settings: {ex.Message}");
+            ShowDisplayError($"Couldn't read {(IsRpcs3Game ? "RPCS3" : "PCSX2")}'s settings: {ex.Message}");
         }
         finally
         {
@@ -255,18 +262,22 @@ public partial class MainWindow : Window
         }
     }
 
-    private void RefreshGt6Display()
+    private void RefreshPs3Display()
     {
+        string game = IsGt6 ? "GT6" : "GT5";
+        var modes = IsGt6 ? Gt6Display.Modes : Gt5Display.Modes;
         FolderLabel.Text = "RPCS3 folder";
         Pcsx2FolderBox.ToolTip = "Found automatically while RPCS3 is running: the folder with rpcs3.exe.";
-        DisplayApply.ToolTip = "Sets GT6's RPCS3 config to stretch to the screen (the old one is backed up first), and the game's width while it runs.";
-        if (DisplayBox.ItemsSource != Gt6Display.Modes) DisplayBox.ItemsSource = Gt6Display.Modes;
+        DisplayApply.ToolTip = IsGt6
+            ? "Sets GT6's RPCS3 config to stretch to the screen (the old one is backed up first), and the game's width while it runs."
+            : "Sets GT5's RPCS3 config to stretch to the screen and turns on RPCS3's Aspect Ratio patch for it. The old files are backed up first.";
+        if (DisplayBox.ItemsSource != modes) DisplayBox.ItemsSource = modes;
         rpcs3Folder = Gt6Display.FindRpcs3Folder(state.Settings.Rpcs3Folder);
         Pcsx2FolderBox.Text = rpcs3Folder ?? state.Settings.Rpcs3Folder ?? "";
-        var saved = Gt6Display.ForId(state.Settings.Gt6Display);
-        if (DisplayBox.SelectedItem is not Ps3DisplayMode) DisplayBox.SelectedItem = saved ?? Gt6Display.Modes[0];
+        ps3Applied = IsGt6 ? Gt6Display.ForId(state.Settings.Gt6Display)?.Id : null;
         if (rpcs3Folder == null)
         {
+            if (DisplayBox.SelectedItem is not Ps3DisplayMode) DisplayBox.SelectedItem = modes.FirstOrDefault(m => m.Id == ps3Applied) ?? modes[0];
             ShowDisplayError("Couldn't find RPCS3's settings. Start RPCS3, or choose its folder below.");
             return;
         }
@@ -276,18 +287,23 @@ public partial class MainWindow : Window
             state.Settings.Rpcs3Folder = rpcs3Folder;
             state.Settings.Save();
         }
-        gt6Stretch = Gt6Display.ReadStretch(rpcs3Folder, Gt6TitleId) == true;
-        if (saved is { Id: not "16:9" } && !gt6Stretch)
-            ShowDisplayError("RPCS3 isn't set to stretch GT6 to the screen any more. Apply again.");
-        else if (saved is { Id: not "16:9" })
-            ShowDisplayNote("Set each time GT6 starts, while this app is open.");
+        if (!IsGt6) ps3Applied = Gt5Display.ReadMode(rpcs3Folder, Ps3TitleId).Id;
+        if (DisplayBox.SelectedItem is not Ps3DisplayMode) DisplayBox.SelectedItem = modes.FirstOrDefault(m => m.Id == ps3Applied) ?? modes[0];
+        ps3Stretch = Gt6Display.ReadStretch(rpcs3Folder, Ps3TitleId) == true;
+        bool wide = ps3Applied is not (null or "16:9");
+        if (!IsGt6 && !Gt5Display.PatchDownloaded(rpcs3Folder, Ps3TitleId))
+            ShowDisplayError("RPCS3 doesn't have GT5's widescreen patch yet. In RPCS3: Manage > Game Patches > Download Latest Patches. It needs GT5 update 2.11.");
+        else if (wide && !ps3Stretch)
+            ShowDisplayError($"RPCS3 isn't set to stretch {game} to the screen. Apply again.");
+        else if (wide)
+            ShowDisplayNote(IsGt6 ? "Set each time GT6 starts, while this app is open." : "Through RPCS3's Aspect Ratio patch for GT5 2.11; works without this app.");
     }
 
     private void UpdateDisplayChoice()
     {
         if (DisplayBox.SelectedItem is Ps3DisplayMode ps3)
         {
-            DisplayApply.IsEnabled = rpcs3Folder != null && (ps3.Id != state.Settings.Gt6Display || gt6Stretch != (ps3.Id != "16:9"));
+            DisplayApply.IsEnabled = rpcs3Folder != null && (ps3.Id != ps3Applied || ps3Stretch != (ps3.Id != "16:9"));
             DisplayBox.ToolTip = ps3.Description;
             return;
         }
@@ -320,7 +336,8 @@ public partial class MainWindow : Window
     {
         if (DisplayBox.SelectedItem is Ps3DisplayMode ps3)
         {
-            ApplyGt6Display(ps3);
+            if (IsGt6) ApplyGt6Display(ps3);
+            else ApplyGt5Display(ps3);
             return;
         }
         if (pcsx2Data == null || DisplayBox.SelectedItem is not DisplayMode mode) return;
@@ -345,7 +362,7 @@ public partial class MainWindow : Window
         if (rpcs3Folder == null) return;
         try
         {
-            var result = Gt6Display.ApplyConfig(rpcs3Folder, Gt6TitleId, mode);
+            var result = Gt6Display.ApplyConfig(rpcs3Folder, Ps3TitleId, mode);
             state.Settings.Gt6Display = mode.Id;
             state.Settings.Save();
             // The width changes live; RPCS3 only reads its config when the game boots.
@@ -355,6 +372,26 @@ public partial class MainWindow : Window
             state.Status($"Display set to {mode.Name}. {when}"
                 + (result.Backups.Count > 0 ? " RPCS3's old GT6 config is backed up next to it (.bak-date)." : ""), StatusKind.Info);
             _ = KeepGt6AspectAsync();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            state.Status($"Couldn't write RPCS3's settings: {ex.Message}", StatusKind.Error);
+        }
+        RefreshDisplay();
+    }
+
+    private void ApplyGt5Display(Ps3DisplayMode mode)
+    {
+        if (rpcs3Folder == null) return;
+        try
+        {
+            var result = Gt5Display.Apply(rpcs3Folder, Ps3TitleId, mode);
+            // RPCS3 reads both files when the game boots.
+            string when = Ps3Running ? "Restart GT5 in RPCS3 to see it." : "It's set when GT5 starts.";
+            state.Status(result.Changed.Count == 0
+                ? $"{mode.Name} was already set."
+                : $"Display set to {mode.Name}. {when}" + (result.Backups.Count > 0 ? " RPCS3's old files are backed up next to them (.bak-date)." : ""),
+                StatusKind.Info);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -390,15 +427,15 @@ public partial class MainWindow : Window
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = IsGt6 ? "RPCS3 folder" : "PCSX2 folder",
-            InitialDirectory = (IsGt6 ? rpcs3Folder : pcsx2Data) ?? "",
+            Title = IsRpcs3Game ? "RPCS3 folder" : "PCSX2 folder",
+            InitialDirectory = (IsRpcs3Game ? rpcs3Folder : pcsx2Data) ?? "",
         };
         if (dialog.ShowDialog(this) == true) SetEmulatorFolder(dialog.FolderName);
     }
 
     private void SetEmulatorFolder(string folder)
     {
-        if (IsGt6)
+        if (IsRpcs3Game)
         {
             if (folder == (rpcs3Folder ?? state.Settings.Rpcs3Folder ?? "")) return;
             state.Settings.Rpcs3Folder = folder.Length == 0 ? null : folder;
@@ -438,7 +475,7 @@ public partial class MainWindow : Window
         SlotBox.IsEnabled = FastBox.IsEnabled = usable && !state.UsesRpcs3 && !state.UsesAzimuth;
         foreach (var view in views) view.ConnectionChanged();
         // PCSX2 or RPCS3 may have just started, so its folder can be found now.
-        if ((IsGt6 ? rpcs3Folder : pcsx2Data) == null && !initializing) RefreshDisplay();
+        if ((IsRpcs3Game ? rpcs3Folder : pcsx2Data) == null && !initializing) RefreshDisplay();
         if (StatusText.Text is "Ready." or "Waiting for PCSX2…" or "Waiting for RPCS3…" or "Waiting for Azimuth…" or "")
             ShowStatus(connected ? "Ready." : $"Waiting for {state.EmulatorName}…", StatusKind.Hint);
     }
