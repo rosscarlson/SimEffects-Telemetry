@@ -9,11 +9,17 @@ is picked up automatically from whichever emulator is running it. See [REQUESTS.
 | Game | Telemetry | Camera | Display |
 |---|---|---|---|
 | GT4 Spec II (PCSX2) | yes | FOV and seat | 16:9 to 32:9 (Game profile card) |
-| GT5, GT6 (RPCS3) | yes | not yet | not yet (RPCS3 patches) |
+| GT5 (RPCS3) | yes | not yet | not yet |
+| GT6 (RPCS3) | yes | not yet | 16:9, 21:9 and 32:9 (Game profile card) |
 | FH2, FH3 (Azimuth) | yes | FOV and seat | any render size (Render Aspect Ratio) |
 
 GT6 telemetry works on 1.00 and 1.05. RPCS3 advises not updating GT6 past 1.05, and each game update moves the data, so
 newer versions aren't supported. GT5 was mapped on 2026-11-03; 2.11 hasn't been checked since.
+
+GT6's display modes widen the 3D view and keep the HUD 16:9 in the middle. Apply writes a GT6-only RPCS3 config
+(config\custom_configs\config_BCUS98296.yml, backed up first): a copy of RPCS3's own settings with Stretch To Display Area
+on, plus RPCS3's database fixes for GT6, which RPCS3 stops applying once a game has its own config (GT6 flickers without
+them). The width itself is set in the game's memory each time GT6 starts, so the app has to be open.
 
 Shared by every game: the telemetry output settings and live readout, the start/stop hotkey (a key or a controller
 button, from anywhere), and one set of camera keys and buttons.

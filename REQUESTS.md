@@ -334,3 +334,29 @@ great, put me back to stock, I'll update to 1.05, we'll support that and then if
 okay, I have the game playing again and will go get on track after I send this message, I do NOT have telemetry open, do what you need, goal is to test it, confirm it, then move on to 32:9
 
 okay, let's fix the version we have published then an update as 0.3
+
+great, thanks working - next up is 32:9 - what do you need from me? I'm in game paused - I also want to add 21:9 since that's so popular but we'll stop with those 3 - if we can add this to the app so others can "apply" it to their game that's the goal, if not let me know
+
+sorry, I stopped you to compact first....
+
+Here's what I asked of you before I stopped you:
+
+great, thanks working - next up is 32:9 - what do you need from me? I'm in game paused - I also want to add 21:9 since that's so popular but we'll stop with those 3 - if we can add this to the app so others can "apply" it to their game that's the goal, if not let me know
+
+okay, in car, on the hood view, not paused, not touching controls
+
+I saw something change very quickly
+
+no, no you haven't - unless I need to restart. When I go fullscreen, which I am now, it only renders the center 16:9, now squished - should I restart or?
+
+I'm on track, not paused, holding the brake to hold the car still
+
+well it sorta worked - the HUD is correct and it's filling my 32:9 monitor but there's a HORRIBLE strobing/flashing/flickering - like once every 1-2 seconds or so, it's like the screen blanks then comes back, etc. - unplayable obviously - thoughts
+
+where are you fixing this, our app or RCPS3?
+
+working great now - no flicker. I've closed my copy of SET and RPCS3
+
+did you update my local EXE in program files?
+
+just publish as 0.3.1 and I'll use the auto-updater, I have confidence you got it right ;-)

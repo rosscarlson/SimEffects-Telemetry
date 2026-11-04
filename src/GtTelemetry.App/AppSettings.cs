@@ -63,6 +63,13 @@ public sealed class AppSettings
     /// <summary>PCSX2's install or data folder; empty means find it from the running PCSX2.</summary>
     public string? Pcsx2Folder { get; set; }
 
+    /// <summary>RPCS3's folder (with config\config.yml); empty means find it from the running RPCS3.</summary>
+    public string? Rpcs3Folder { get; set; }
+
+    /// <summary>GT6's display mode ("16:9", "21:9", "32:9"), set in RPCS3's memory each time the game runs. Null until
+    /// one is applied.</summary>
+    public string? Gt6Display { get; set; }
+
     public List<WatchSetting> Watch { get; set; } = [];
 
     /// <summary>FOV and seat hotkeys (while PCSX2 has focus).</summary>

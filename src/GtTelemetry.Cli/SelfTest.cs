@@ -121,6 +121,7 @@ internal static class SelfTest
         failures += packetChecks.Count(e => !e.Ok);
 
         failures += DisplayChecks();
+        failures += Gt6DisplayChecks();
         failures += CameraChecks();
         failures += Ps3Checks(Ps3CarLayout.Gt6);
         failures += Ps3Checks(Ps3CarLayout.Gt6v105);
@@ -350,6 +351,72 @@ internal static class SelfTest
                 ("old names", renamed),
             };
             Console.WriteLine("display     " + string.Join("  ", checks.Select(e => (e.Ok ? "ok " : "FAIL ") + e.What)));
+            return checks.Count(e => !e.Ok);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
+    /// <summary>GT6 display: its RPCS3 config on a scratch folder shaped like the real one, and the aspect found and set in
+    /// memory laid out like 1.05's display block.</summary>
+    private static int Gt6DisplayChecks()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "gtt-selftest-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(dir, "config"));
+            Directory.CreateDirectory(Path.Combine(dir, "GuiConfigs"));
+            const string global = "Core:\n  PPU Threads: 2\n  Accurate RSX reservation access: false\n  Libraries Control:\n    - libvdec.sprx:lle\n"
+                                + "Video:\n  Renderer: Vulkan\n  Read Color Buffers: false\n  Stretch To Display Area: false\n  Vulkan:\n    Adapter: \"\"\n"
+                                + "  Write Color Buffers: false\nAudio:\n  Volume: 100\n";
+            File.WriteAllText(Path.Combine(dir, "config", "config.yml"), global);
+            File.WriteAllText(Path.Combine(dir, "GuiConfigs", "config_database.dat"),
+                "{\"games\":{\"BCUS98296\":{\"config\":\"Core:\\n  Accurate RSX reservation access: true\\nVideo:\\n  Read Color Buffers: true\\n  Write Color Buffers: true\"}}}");
+            var modes = Core.Display.Gt6Display.Modes;
+            var path = Core.Display.Gt6Display.ConfigPath(dir, "BCUS98296");
+
+            bool noneYet = Core.Display.Gt6Display.ReadStretch(dir, "BCUS98296") == null;
+            var r1 = Core.Display.Gt6Display.ApplyConfig(dir, "BCUS98296", modes.First(m => m.Id == "32:9"));
+            var wide = File.ReadAllText(path);
+            var r2 = Core.Display.Gt6Display.ApplyConfig(dir, "BCUS98296", modes.First(m => m.Id == "21:9"));
+            var r3 = Core.Display.Gt6Display.ApplyConfig(dir, "BCUS98296", modes.First(m => m.Id == "16:9"));
+            bool narrow = Core.Display.Gt6Display.ReadStretch(dir, "BCUS98296") == false;
+            string expected = global.Replace("reservation access: false", "reservation access: true").Replace("Buffers: false", "Buffers: true")
+                                    .Replace("Display Area: false", "Display Area: true");
+
+            // Without RPCS3's database the known GT6 fixes are used; a key missing from the config is added to its section.
+            File.Delete(Path.Combine(dir, "GuiConfigs", "config_database.dat"));
+            var known = Core.Display.Gt6Display.DatabaseFixes(dir, "BCUS98296");
+            var added = Core.Display.YamlLines.Set("Core:\n  A: 1\nVideo:\n  B: 2\n\nAudio:\n  C: 3\n", ["Video", "D"], "true");
+            var nested = Core.Display.YamlLines.Set(global, ["Video", "Vulkan", "Adapter"], "\"GPU\"");
+
+            // The display block: 1280 × 720 twice, aspect twice, 1, 0.5, 0.5, 1.0.
+            var ram = new Ps3Ram(0x4FF00000, 0x100000);
+            uint at = 0x4FFD33AC;
+            foreach (var (o, v) in new[] { (-0x10, 1280u), (-0xC, 720u), (-8, 1280u), (-4, 720u), (8, 1u) })
+                BinaryPrimitives.WriteUInt32BigEndian(ram.Ram.AsSpan((int)(at - 0x4FF00000) + o), v);
+            ram.F(at, 16f / 9); ram.F(at + 4, 16f / 9); ram.F(at + 0xC, 0.5f); ram.F(at + 0x10, 0.5f); ram.F(at + 0x14, 1f);
+            var writer = new Core.Display.Gt6AspectWriter(ram, ram);
+            var first = writer.Apply(32f / 9);
+            float now = BinaryPrimitives.ReadSingleBigEndian(ram.Ram.AsSpan((int)(at - 0x4FF00000)));
+            var second = writer.Apply(32f / 9);
+            var empty = new Core.Display.Gt6AspectWriter(new Ps3Ram(0x4FF00000, 0x1000), new Ps3Ram(0x4FF00000, 0x1000)).Apply(32f / 9);
+
+            var checks = new (string What, bool Ok)[]
+            {
+                ("no config", noneYet),
+                ("32:9 config", wide == expected && r1.Backups.Count == 0),
+                ("21:9 same", r2.Changed.Count == 0),
+                ("16:9 config", narrow && r3.Backups.Count == 1 && File.ReadAllText(path) == expected.Replace("Display Area: true", "Display Area: false")),
+                ("known fixes", known.Count == 3),
+                ("add key", added == "Core:\n  A: 1\nVideo:\n  B: 2\n  D: true\n\nAudio:\n  C: 3\n"),
+                ("nested key", nested == global.Replace("Adapter: \"\"", "Adapter: \"GPU\"")),
+                ("aspect set", writer.Address == at && first is > 1.77f and < 1.78f && Math.Abs(now - 32f / 9) < 1e-5f && second is > 3.55f and < 3.56f),
+                ("no block", empty == null),
+            };
+            Console.WriteLine("gt6 display " + string.Join("  ", checks.Select(e => (e.Ok ? "ok " : "FAIL ") + e.What)));
             return checks.Count(e => !e.Ok);
         }
         finally

@@ -99,7 +99,9 @@
                                     Click="DisplayApply_Click" ToolTip="Writes PCSX2's settings for this game. The old files are backed up first."/>
                         </Grid>
 
-                        <TextBlock Text="PCSX2 folder" Margin="0,12,0,6"/>
+                        <TextBlock x:Name="DisplayNote" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,6,0,0" Visibility="Collapsed"/>
+
+                        <TextBlock x:Name="FolderLabel" Text="PCSX2 folder" Margin="0,12,0,6"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>

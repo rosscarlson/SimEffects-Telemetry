@@ -115,7 +115,7 @@ public static class AdapterCatalog
             new(Feature.MemoryAccess, Support.Available, "Read straight from RPCS3's memory; nothing to turn on in RPCS3"),
             new(Feature.Telemetry, Support.Available, "Forza Data Out (Horizon or Dash format) over UDP, e.g. to SimHub"),
             new(Feature.CameraControl, Support.Planned, "Next"),
-            new(Feature.DisplayPatches, Support.Planned, "RPCS3 patches"),
+            new(Feature.DisplayPatches, Support.Available, "16:9, 21:9 and 32:9, set while the game runs, with RPCS3 stretching to fill the screen"),
         ],
     };
 
