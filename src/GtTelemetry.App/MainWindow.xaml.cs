@@ -15,7 +15,6 @@ using GtTelemetry.Core.Speech;
 
 namespace GtTelemetry.App;
 
-public sealed record FeatureRow(string Name, string SupportText, bool IsAvailable, string Note);
 
 public partial class MainWindow : Window
 {
@@ -167,15 +166,8 @@ public partial class MainWindow : Window
     {
         var a = state.Adapter;
         if (!ReferenceEquals(AdapterBox.SelectedItem, a)) AdapterBox.SelectedItem = a;
-        AdapterInfo.Text = $"{a.Platform} · {GameAdapter.SourceName(a.Source)}"
-            + (a.GameIds.Count > 0 && a.Source != MemorySourceKind.Azimuth ? $" · {string.Join(", ", a.GameIds)}" : "");
-        // Only what works, or what's planned; nothing that isn't coming.
-        FeatureList.ItemsSource = a.Features.Where(f => f.Support != Support.Unavailable).Select(f => new FeatureRow(
-            GameAdapter.FeatureName(f.Feature),
-            f.Support switch { Support.Available => "Available", Support.Planned => "Planned", _ => "Unavailable" },
-            f.Support == Support.Available,
-            string.IsNullOrEmpty(f.Note) ? f.Support.ToString() : f.Note)).ToList();
-        // The display card is hidden for games without display patches; the feature list above says what's planned.
+        ProfileHeader.Text = $"{a.Name} Profile";
+        // The display card is hidden for games without display patches.
         // Azimuth's render size is on the Telemetry tab instead (Render Aspect Ratio).
         ProfileCard.Visibility = a.SupportOf(Feature.DisplayPatches) == Support.Available && (a.Source == MemorySourceKind.Pcsx2Pine || a == AdapterCatalog.Gt5 || a == AdapterCatalog.Gt6) ? Visibility.Visible : Visibility.Collapsed;
         // The camera bindings are shared by every game, so the card stays; it's greyed out for games without camera control.
@@ -295,8 +287,8 @@ public partial class MainWindow : Window
             ShowDisplayError("RPCS3 doesn't have GT5's widescreen patch yet. In RPCS3: Manage > Game Patches > Download Latest Patches. It needs GT5 update 2.11.");
         else if (wide && !ps3Stretch)
             ShowDisplayError($"RPCS3 isn't set to stretch {game} to the screen. Apply again.");
-        else if (wide)
-            ShowDisplayNote(IsGt6 ? "Set each time GT6 starts, while this app is open." : "Through RPCS3's Aspect Ratio patch for GT5 2.11; works without this app.");
+        else if (wide && IsGt6)
+            ShowDisplayNote("Set each time GT6 starts, while this app is open.");
     }
 
     private void UpdateDisplayChoice()
@@ -474,10 +466,33 @@ public partial class MainWindow : Window
         ConnectButton.IsEnabled = usable && !state.Connecting;
         SlotBox.IsEnabled = FastBox.IsEnabled = usable && !state.UsesRpcs3 && !state.UsesAzimuth;
         foreach (var view in views) view.ConnectionChanged();
+        RefreshGameError();
         // PCSX2 or RPCS3 may have just started, so its folder can be found now.
         if ((IsRpcs3Game ? rpcs3Folder : pcsx2Data) == null && !initializing) RefreshDisplay();
         if (StatusText.Text is "Ready." or "Waiting for PCSX2…" or "Waiting for RPCS3…" or "Waiting for Azimuth…" or "")
             ShowStatus(connected ? "Ready." : $"Waiting for {state.EmulatorName}…", StatusKind.Hint);
+    }
+
+    /// <summary>The Game card's error: PCSX2 running without PINE, or a PS3 game on a version the app doesn't know.</summary>
+    private void RefreshGameError()
+    {
+        string? error = null;
+        var a = state.Adapter;
+        if (a.Source == MemorySourceKind.Pcsx2Pine && state.PineMissing)
+            error = "PINE isn't enabled in PCSX2. It needs to be enabled.";
+        else if (state.UsesRpcs3 && Ps3GameVersion.Required.TryGetValue(a.Id, out var required)
+                 && Gt6Display.FindRpcs3Folder(state.Settings.Rpcs3Folder) is { } folder)
+        {
+            // The running game, else whichever of its discs is installed.
+            List<string> ids = Ps3Running ? [Ps3TitleId] : a.GameIds.Where(id => Ps3GameVersion.Read(folder, id) != null).ToList();
+            var version = ids.Select(id => Ps3GameVersion.Read(folder, id)).FirstOrDefault();
+            if (ids.Count > 0 && version != required)
+                error = $"{a.Name} is {(version == null ? "not updated" : $"version {Short(version)}")} in RPCS3. This app needs version {Short(required)}.";
+        }
+        GameError.Text = error ?? "";
+        GameError.Visibility = error == null ? Visibility.Collapsed : Visibility.Visible;
+
+        static string Short(string v) => v.TrimStart('0') is { Length: > 0 } t && t[0] != '.' ? t : v;
     }
 
     private async void ConnectButton_Click(object sender, RoutedEventArgs e)

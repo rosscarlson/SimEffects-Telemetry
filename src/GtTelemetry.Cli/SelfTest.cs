@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Text;
 using GtTelemetry.Core;
 using GtTelemetry.Core.Memory;
 using GtTelemetry.Core.Telemetry;
@@ -123,6 +124,7 @@ internal static class SelfTest
         failures += DisplayChecks();
         failures += Gt6DisplayChecks();
         failures += Gt5DisplayChecks();
+        failures += SfoChecks();
         failures += CameraChecks();
         failures += Ps3Checks(Ps3CarLayout.Gt6);
         failures += Ps3Checks(Ps3CarLayout.Gt6v105);
@@ -429,6 +431,37 @@ internal static class SelfTest
 
     /// <summary>GT5 display: the patch turned on with each mode's value in patch_config.yml next to another patch, read
     /// back, turned off for 16:9, and a patch_config.yml made from nothing.</summary>
+    /// <summary>PARAM.SFO: two string entries, laid out as PS3 games write them.</summary>
+    private static int SfoChecks()
+    {
+        var keys = Encoding.ASCII.GetBytes("APP_VER TITLE_ID   ");
+        var values = Encoding.ASCII.GetBytes("02.11   BCUS98114   ");
+        var sfo = new List<byte> { 0, (byte)'P', (byte)'S', (byte)'F', 1, 1, 0, 0 };
+        sfo.AddRange(BitConverter.GetBytes(20 + 32));
+        sfo.AddRange(BitConverter.GetBytes(20 + 32 + keys.Length));
+        sfo.AddRange(BitConverter.GetBytes(2));
+        foreach (var (key, len, max, data) in new[] { (0, 6, 8, 0), (8, 10, 12, 8) })
+        {
+            sfo.AddRange(BitConverter.GetBytes((ushort)key));
+            sfo.AddRange(BitConverter.GetBytes((ushort)0x0204));
+            sfo.AddRange(BitConverter.GetBytes(len));
+            sfo.AddRange(BitConverter.GetBytes(max));
+            sfo.AddRange(BitConverter.GetBytes(data));
+        }
+        sfo.AddRange(keys);
+        sfo.AddRange(values);
+        var bytes = sfo.ToArray();
+        var checks = new (string What, bool Ok)[]
+        {
+            ("app ver", Core.Display.Ps3GameVersion.ReadSfo(bytes, "APP_VER") == "02.11"),
+            ("title id", Core.Display.Ps3GameVersion.ReadSfo(bytes, "TITLE_ID") == "BCUS98114"),
+            ("missing", Core.Display.Ps3GameVersion.ReadSfo(bytes, "VERSION") == null),
+            ("not sfo", Core.Display.Ps3GameVersion.ReadSfo(new byte[40], "APP_VER") == null),
+        };
+        Console.WriteLine("param.sfo   " + string.Join("  ", checks.Select(e => (e.Ok ? "ok " : "FAIL ") + e.What)));
+        return checks.Count(e => !e.Ok);
+    }
+
     private static int Gt5DisplayChecks()
     {
         var dir = Path.Combine(Path.GetTempPath(), "gtt-selftest-" + Guid.NewGuid().ToString("N"));

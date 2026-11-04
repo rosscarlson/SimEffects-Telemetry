@@ -175,6 +175,9 @@ public sealed class AppState : Observable
 
     public GameInfo? Game { get => game; private set => Set(ref game, value); }
 
+    /// <summary>PCSX2 is running but PINE can't be reached (it's turned off in PCSX2's settings).</summary>
+    public bool PineMissing { get; private set; }
+
     // ---- status line (bottom of the main card) ----
 
     public event Action<string, StatusKind>? StatusChanged;
@@ -354,6 +357,7 @@ public sealed class AppState : Observable
         }
         var c = Connection;
         bool pine = c.Pine.IsConnected, proc = c.Process.IsConnected;
+        PineMissing = !pine && System.Diagnostics.Process.GetProcesses().Any(p => p.ProcessName.StartsWith("pcsx2", StringComparison.OrdinalIgnoreCase));
         ConnectionSummary = pine && proc ? "Connected" : pine ? "Connected (PINE only)" : proc ? "Connected (process memory only)" : "Not connected";
 
         var lines = new List<string>

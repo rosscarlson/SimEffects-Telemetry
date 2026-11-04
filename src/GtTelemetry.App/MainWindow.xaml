@@ -58,36 +58,15 @@
                             <TextBlock Text="Game" Style="{StaticResource CardHeader}" Margin="0" VerticalAlignment="Center"/>
                         </DockPanel>
                         <ComboBox x:Name="AdapterBox" DisplayMemberPath="Name" SelectionChanged="AdapterBox_SelectionChanged"/>
-                        <TextBlock x:Name="AdapterInfo" Style="{StaticResource SecondaryText}" Margin="0,6,0,10"/>
-                        <ItemsControl x:Name="FeatureList">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <DockPanel Margin="0,0,0,6" ToolTip="{Binding Note}">
-                                        <Border DockPanel.Dock="Right" Style="{StaticResource Pill}" x:Name="Pill">
-                                            <TextBlock Text="{Binding SupportText}" FontSize="11" x:Name="PillText"/>
-                                        </Border>
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" x:Name="Name" TextTrimming="CharacterEllipsis"/>
-                                    </DockPanel>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsAvailable}" Value="True">
-                                            <Setter TargetName="Pill" Property="Background" Value="{DynamicResource SuccessBrush}"/>
-                                            <Setter TargetName="Pill" Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
-                                            <Setter TargetName="PillText" Property="Foreground" Value="{DynamicResource AccentForegroundBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsAvailable}" Value="False">
-                                            <Setter TargetName="Name" Property="Opacity" Value="0.45"/>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock x:Name="GameError" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   Foreground="{DynamicResource ErrorTextBrush}" Visibility="Collapsed"/>
                     </StackPanel>
                 </Border>
 
                 <!-- Game profile -->
                 <Border x:Name="ProfileCard" Style="{StaticResource Card}">
                     <StackPanel>
-                        <TextBlock x:Name="ProfileHeader" Text="Game profile" Style="{StaticResource CardHeader}"/>
+                        <TextBlock x:Name="ProfileHeader" Text="Profile" Style="{StaticResource CardHeader}"/>
                         <TextBlock Text="Display" Margin="0,0,0,6"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
