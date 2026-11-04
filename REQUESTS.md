@@ -7,7 +7,7 @@ What was asked, word for word, by date.
 # Project Brief: Gran Turismo Telemetry
 
 ## Locations
-- Working directory: C:\Users\ross\OneDrive\Code\Windows\GranTurismoTelemetry
+- Working directory: C:\Users\ross\OneDrive\Code\Windows\SimEffectsTelemetry
 - Visual design guide: C:\Users\ross\OneDrive\Code\Windows\design.md (follow it for all UI)
 - PCSX2: G:\Tools\PCSX2
 - Game: G:\ROMs\Gran Turismo 4 Spec II v1.10 (patched GT4 Online Public Beta, NTSC-U, SCUS-97436)
@@ -283,3 +283,54 @@ You can merge Forza Horizon 2 and 3 - they both use the exact same code and get 
 Let's move the "Start" button (and just say "Start" with the icon) in the upper right of the Game block that is in the upper left with it being a bit smaller to fit. Remove "Per-car profiles" from all but FM4, in fact only show what's planned for GT5 GT6 and remove the rest
 
 now we need to add an auto-update system, let's add a new block in the bottom left that handles that, showing the user when an udpate is avilable and giving them an "Update" button, showing what version they are, what's current and the number of releases behind they are. Let's call this version 0.2 and publish to github - that way once I install (give me an installer) I can test the updater when you push 0.3 - the installer should write to Program Files\SimEffect\Telemetry
+
+## 2026-11-04
+
+Write me a brief I can give to another instance of Claude Code so it can update my website with this project. I want it to be somewhat brief in what the page has, less is more sorta thing, and give some details on how to get each game working with it - I'll flush out the rest of the page myself.
+
+put the text here for me so I can copy/paste
+
+First - I renamed this working directory as SimEffectsTelemetry - so anywhere we had any other name or path please update now
+
+we have somehow broken GT6 - when I launch I get an error that the PS3 game has lilkely crashed and it certainly seems to - your fault? Was working
+
+well it keeps happening and I can't skip anything - but this WAS working as we did a lot of testing, if you can do something to help do as Im' stuck now
+
+okay now I can launch the game but as soon as I get on track I see nothing - the hud works but nothing in my view does regardless of the view I select - so I think something you did while trying to update the seating position may have caused it - either way thoughts?
+
+okay, but what version do we need for 32:9?
+
+no, we found one for "Aspect Ratio"
+
+okay, it's working - but I hvae an issue in both GT5 and GT6, my shifters don't work. I've triple chcked them in RPCS3 under the G27 emulation and it shows them both set and registering under shifters but they don't work in either game. Seems other buttons do so not sure what's up - they work fine in everything else (the paddles) - other than that - and a performance issue I haven't started on yet, I'm getting 32fps but there's a lot of audible static and performance is awful - nothing else big is running. Thoughts
+
+1. I'm a pro-level instrcutor, it is NOT that (I set it to manual)
+2. I see no options to change any bindings in game
+
+and I only mean my sequential paddles - look this up online please
+
+great - but now a bigger issue, SimEffects Telemetry is no longer working with 6 (haven't tried 5 yet) - I have it running but it just shows "Not driving" while I am, let me know what you need me to do - I'm going to close my copy of the app, I'm paused in GT6 on track alone right now
+
+continue
+
+do you remember where we were and my last command
+
+I am paused on track with only SimHub open to get the data from you/our app - let's go
+
+yup, that fixed it - so does that mean we can only support specific versions of the game
+
+okay, so in short we need to get me on the latest version of the game right? Since I had trouble earlier how far should I go now? Try half the updates, see if it works and find where it breaks?
+
+I want 2 things - share with others and 32:9 - in that order - I'm updating now as I have them all downloaded. I'll try to see where it breaks - but can you look up the black/no track issue I had with 2.11?
+
+okay I'm now stuck in a loop - the game crashed during the updates now I get an error that the update can't install and it reboots - and over and over - I tried updating to 116 (I was on 115) but that didn't help - so I guess put me back to stock
+
+should I do 5 at a time, launch game and check or just all at once?
+
+suddenly Alt-Enter won't make RPCS3 go to non-full screen, I see the cursor again and I can alt tab but if I click back on the game it's still actually fullscreen and goes back to fullscreen - am I missing some setting? I have the game running but it sure seems like it's died again as it's just frozen doing the update
+
+great, put me back to stock, I'll update to 1.05, we'll support that and then if that works you can start on 32:9 support
+
+okay, I have the game playing again and will go get on track after I send this message, I do NOT have telemetry open, do what you need, goal is to test it, confirm it, then move on to 32:9
+
+okay, let's fix the version we have published then an update as 0.3

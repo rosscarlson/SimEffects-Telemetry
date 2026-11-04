@@ -12,6 +12,9 @@ is picked up automatically from whichever emulator is running it. See [REQUESTS.
 | GT5, GT6 (RPCS3) | yes | not yet | not yet (RPCS3 patches) |
 | FH2, FH3 (Azimuth) | yes | FOV and seat | any render size (Render Aspect Ratio) |
 
+GT6 telemetry works on 1.00 and 1.05. RPCS3 advises not updating GT6 past 1.05, and each game update moves the data, so
+newer versions aren't supported. GT5 was mapped on 2026-11-03; 2.11 hasn't been checked since.
+
 Shared by every game: the telemetry output settings and live readout, the start/stop hotkey (a key or a controller
 button, from anywhere), and one set of camera keys and buttons.
 
@@ -73,7 +76,7 @@ The **Updates** card (bottom left) checks the releases when the app opens and ev
 the latest one and how many releases behind you are; **Update** downloads the new installer, runs it and restarts the app.
 
 To release: bump `<Version>` in `src/GtTelemetry.App/GtTelemetry.App.csproj`, commit and push, then
-`powershell -File toolselease.ps1 -Publish -Notes "What changed"` (needs Inno Setup 6 and the `gh` CLI). That builds
+`powershell -File tools\release.ps1 -Publish -Notes "What changed"` (needs Inno Setup 6 and the `gh` CLI). That builds
 `publish\installer\SimEffectsTelemetry-Setup-X.Y.Z.exe` and makes the `vX.Y.Z` release with it attached.
 
 ## Running

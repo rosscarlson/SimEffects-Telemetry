@@ -312,7 +312,7 @@ internal static class Program
         double? forSeconds = TakeOption(a, "--for") is string f ? double.Parse(f, CultureInfo.InvariantCulture) : null;
 
         string game = (TakeOption(a, "--game") ?? "gt4").ToLowerInvariant();
-        var layout = game switch { "gt5" => Ps3CarLayout.Gt5, "gt6" => Ps3CarLayout.Gt6, _ => null };
+        var layout = game is "gt5" or "gt6" ? Ps3CarLayout.ForGame(game) : null;
         using var c = layout != null ? null : Connect();
         using var rpcs3 = layout != null ? new Rpcs3ProcessMemory() : null;
         ITelemetrySource source;
@@ -323,7 +323,7 @@ internal static class Program
             var gt6Source = new Ps3GtTelemetry(layout!, rpcs3, rpcs3);
             gt6Source.Read();
             var (title, id) = rpcs3.Game();
-            Console.WriteLine($"RPCS3 {title} [{id}]: {gt6Source.LastSearchCount} car block(s), using 0x{gt6Source.Car:X8}; search took {sw.ElapsedMilliseconds} ms");
+            Console.WriteLine($"RPCS3 {title} [{id}]: {gt6Source.LastSearchCount} car block(s), using 0x{gt6Source.Car:X8} ({gt6Source.Layout.Game} {gt6Source.Layout.Version} layout); search took {sw.ElapsedMilliseconds} ms");
             source = gt6Source;
         }
         else

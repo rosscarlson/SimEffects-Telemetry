@@ -13,6 +13,9 @@ public sealed record Ps3CarLayout
 {
     public required string Game { get; init; }
 
+    /// <summary>The game update the layout was mapped on; updates move the fields.</summary>
+    public required string Version { get; init; }
+
     public required int BlockSize { get; init; }
 
     public int Position { get; init; } = 0x70;          // f32 ×3, world X, Y, Z (Z up)
@@ -47,6 +50,7 @@ public sealed record Ps3CarLayout
     public static readonly Ps3CarLayout Gt6 = new()
     {
         Game = "GT6",
+        Version = "1.00",
         BlockSize = 0x1000,
         AngularVelocity = 0x58,
         Velocity = 0x64,
@@ -69,11 +73,35 @@ public sealed record Ps3CarLayout
         },
     };
 
+    /// <summary>GT6 1.05, mapped 2026-11-04 at the car block 0x423FD3E0. The wheel structs start 4 bytes later and are
+    /// 4 bytes shorter (the suspension and surface moved up 4 within them), so everything after them sits 0xC earlier.</summary>
+    public static readonly Ps3CarLayout Gt6v105 = Gt6 with
+    {
+        Version = "1.05",
+        Wheel0 = 0x124,
+        WheelStride = 0x164,
+        Rpm = 0x730,
+        Gear = 0x7CC,
+        Accel = 0x88C,
+        Speed = 0x89C,
+        Steer = 0x928,
+        Throttle = 0x92C,
+        Brake = 0x930,
+        WheelSuspension = 0x120,
+        WheelSurface = 0x145,
+    };
+
+    /// <summary>The layouts to try for a game ("gt5" or "gt6"), newest update first. The same list each call.</summary>
+    public static IReadOnlyList<Ps3CarLayout> ForGame(string id) => id == "gt5" ? Gt5Versions : Gt6Versions;
+
+    private static readonly Ps3CarLayout[] Gt6Versions = [Gt6v105, Gt6];
+
     /// <summary>GT5 (BCUS98114), mapped 2026-11-03 at Laguna Seca with the car block at 0x424C1280. Surface codes: 0 tarmac,
     /// 1 kerb, 4 the rough strip just past a kerb or the track edge, 2 grass.</summary>
     public static readonly Ps3CarLayout Gt5 = new()
     {
         Game = "GT5",
+        Version = "pre-2.11",   // not recorded; 2.11 was installed 2026-11-04 and hasn't been checked yet
         BlockSize = 0xB00,
         Wheel0 = 0xCC,
         WheelStride = 0x14C,
@@ -96,15 +124,20 @@ public sealed record Ps3CarLayout
             _ => (false, 0f),
         },
     };
+
+    private static readonly Ps3CarLayout[] Gt5Versions = [Gt5];
 }
 
 /// <summary>
 /// Telemetry for the PS3 Gran Turismos in RPCS3 (docs/ps3/memory-map.md). The car block moves between races, so it's
 /// found by its shape (unit body axes, and four wheel structs whose rotation matrices line up with the body) and checked
-/// every frame. PS3 memory is big-endian.
+/// every frame. Game updates move the fields, so each known layout is tried and the one that finds a car is used. PS3
+/// memory is big-endian.
 /// </summary>
-public sealed class Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IRegionSource regions) : ITelemetrySource
+public sealed class Ps3GtTelemetry(IReadOnlyList<Ps3CarLayout> layouts, IMemorySource memory, IRegionSource regions) : ITelemetrySource
 {
+    public Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IRegionSource regions) : this([layout], memory, regions) { }
+
     // Where the race heap lives; both games have put the car around 0x42000000.
     public const uint HeapFrom = 0x40000000, HeapTo = 0x50000000;
 
@@ -116,16 +149,20 @@ public sealed class Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IR
 
     private readonly Stopwatch changedAge = new();
     private readonly Stopwatch searchAge = new();
-    private readonly byte[] block = new byte[layout.BlockSize];
-    private readonly byte[] previous = new byte[layout.BlockSize];
+    private readonly byte[] block = new byte[layouts.Max(l => l.BlockSize)];
+    private readonly byte[] previous = new byte[layouts.Max(l => l.BlockSize)];
     private readonly float[] suspExtended = new float[4];
     private readonly float[] suspCompressed = new float[4];
     private bool suspInitialised;
+    private Ps3CarLayout layout = layouts[0];
     private uint car;
     private float maxRpm;
     private float idleRpm;
 
+    /// <summary>The layout in use: the one that found the car, or the newest before that.</summary>
     public Ps3CarLayout Layout => layout;
+
+    public IReadOnlyList<Ps3CarLayout> Layouts => layouts;
 
     /// <summary>The car block in use, 0 if not found.</summary>
     public uint Car => car;
@@ -147,17 +184,18 @@ public sealed class Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IR
         {
             if (searchAge.IsRunning && searchAge.ElapsedMilliseconds < SearchEveryMs) return TelemetryFrame.NotDriving;
             searchAge.Restart();
-            var found = Search();
+            var found = SearchAll();
             LastSearchCount = found.Count;
             if (found.Count == 0) return TelemetryFrame.NotDriving;
-            car = found[0];
+            // Prefer a car that's moving: the player's, rather than one parked in the pits.
+            (car, layout, _) = found.Find(f => f.Speed > 0.5f) is { Layout: not null } moving ? moving : found[0];
             ResetCarLimits();
             changedAge.Reset();
         }
 
         try
         {
-            memory.Read(car, block);
+            memory.Read(car, block.AsSpan(0, layout.BlockSize));
         }
         catch (MemorySourceException) when (memory.IsConnected)
         {
@@ -261,13 +299,17 @@ public sealed class Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IR
         return wheels;
     }
 
-    /// <summary>Searches the race heap for car blocks. Takes a few hundred milliseconds.</summary>
-    public List<uint> Search()
+    /// <summary>Searches the race heap for car blocks in any of the layouts. Takes a few hundred milliseconds.</summary>
+    public List<uint> Search() => SearchAll().Select(f => f.Address).ToList();
+
+    private List<(uint Address, Ps3CarLayout Layout, float Speed)> SearchAll()
     {
-        var found = new List<uint>();
+        var found = new List<(uint Address, Ps3CarLayout Layout, float Speed)>();
         const int chunk = 4 << 20;
-        int size = layout.BlockSize;
+        int size = layouts.Max(l => l.BlockSize);
         var buf = new byte[chunk + size];
+        var candidates = layouts.ToArray();
+        var axisOffsets = candidates.Select(l => l.AxisForward).Distinct().ToArray();
         foreach (var r in regions.Regions(HeapFrom, HeapTo))
         {
             for (uint off = 0; off < r.Size; off += chunk)
@@ -280,11 +322,18 @@ public sealed class Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IR
                 // a unit forward axis.
                 for (int start = 0; start < chunk && start + size <= len; start += 4)
                 {
-                    if (!Unit(span, start + layout.AxisForward)) continue;
-                    if (LooksLikeCar(layout, span.Slice(start, size)))
+                    bool any = false;
+                    for (int i = 0; i < axisOffsets.Length && !any; i++) any = Unit(span, start + axisOffsets[i]);
+                    if (!any) continue;
+                    foreach (var l in candidates)
                     {
-                        uint addr = r.Start + off + (uint)start;
-                        if (!found.Contains(addr)) found.Add(addr);
+                        var b = span.Slice(start, l.BlockSize);
+                        if (LooksLikeCar(l, b) && Plausible(l, b))
+                        {
+                            uint addr = r.Start + off + (uint)start;
+                            if (!found.Exists(f => f.Address == addr)) found.Add((addr, l, Fb(b, l.Speed)));
+                            break;
+                        }
                     }
                 }
             }
@@ -307,6 +356,17 @@ public sealed class Ps3GtTelemetry(Ps3CarLayout layout, IMemorySource memory, IR
             if (DotAt(b, m + 24, l.AxisUp) < 0.8f) return false;
         }
         return true;
+    }
+
+    /// <summary>Readings a running car has: the engine turning, a real gear, and the speed matching the velocity. Rules out
+    /// blocks that only have the shape, like tables of 0s and 1s, and the same block read with another update's layout.</summary>
+    public static bool Plausible(Ps3CarLayout l, ReadOnlySpan<byte> b)
+    {
+        float rpm = Fb(b, l.Rpm), speed = Fb(b, l.Speed);
+        byte gear = b[l.Gear];
+        float vx = Fb(b, l.Velocity), vy = Fb(b, l.Velocity + 4), vz = Fb(b, l.Velocity + 8);
+        float v = MathF.Sqrt(vx * vx + vy * vy + vz * vz);
+        return rpm is > 100 and < 25000 && (gear <= 10 || gear >= 0x80) && float.IsFinite(v) && Math.Abs(speed - v) < 1 + 0.1f * v;
     }
 
     private static float Fb(ReadOnlySpan<byte> s, int o) => BinaryPrimitives.ReadSingleBigEndian(s[o..]);

@@ -123,6 +123,7 @@ internal static class SelfTest
         failures += DisplayChecks();
         failures += CameraChecks();
         failures += Ps3Checks(Ps3CarLayout.Gt6);
+        failures += Ps3Checks(Ps3CarLayout.Gt6v105);
         failures += Ps3Checks(Ps3CarLayout.Gt5);
 
         Console.WriteLine(failures == 0 ? "All checks passed." : $"{failures} check(s) failed.");

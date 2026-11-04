@@ -22,7 +22,7 @@ public static class ProjectPaths
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         for (var d = dir; d != null; d = d.Parent)
-            if (File.Exists(Path.Combine(d.FullName, "GranTurismoTelemetry.sln")))
+            if (File.Exists(Path.Combine(d.FullName, "SimEffectsTelemetry.sln")))
                 return d.FullName;
         return dir.FullName;
     }

@@ -31,8 +31,8 @@ public partial class TelemetryView : UserControl, IAppView
             if (state.UsesAzimuth) return TelemetryFrame.NotDriving;
             if (state.UsesRpcs3)
             {
-                var layout = state.Adapter.Id == "gt5" ? Ps3CarLayout.Gt5 : Ps3CarLayout.Gt6;
-                if (ps3?.Layout != layout) ps3 = new Ps3GtTelemetry(layout, state.Rpcs3, state.Rpcs3);
+                var layouts = Ps3CarLayout.ForGame(state.Adapter.Id);
+                if (ps3?.Layouts != layouts) ps3 = new Ps3GtTelemetry(layouts, state.Rpcs3, state.Rpcs3);
                 return ps3.Read();
             }
             var c = state.Connection;
