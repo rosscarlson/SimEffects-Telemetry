@@ -124,7 +124,7 @@ public static class AdapterCatalog
     public static readonly GameAdapter ForzaHorizon = new()
     {
         Id = "fh",
-        Name = "Forza Horizon 2 & 3",
+        Name = "Forza - Azimuth",
         Platform = "Xbox One",
         Source = MemorySourceKind.Azimuth,
         GameIds = ["fh2", "fh3"],
