@@ -19,7 +19,6 @@ public partial class MainWindow
     /// <summary>Called once the window has a handle (RegisterHotKey needs one).</summary>
     private void SetUpStartStop()
     {
-        AnnounceCheck.IsChecked = state.Settings.AnnounceToggle;
         var source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
         if (source == null) return;
         startStopHotkey = new GlobalHotkey(source);
@@ -32,7 +31,7 @@ public partial class MainWindow
     private void ToggleTelemetry()
     {
         bool on = TelemetryView.Toggle();
-        if (state.Settings.AnnounceToggle) toggleVoice.Say(on ? "Telemetry on" : "Telemetry off", beep: false);
+        toggleVoice.Say(on ? "Telemetry on" : "Telemetry off", beep: false);
     }
 
     private void StartButton_Click(object sender, RoutedEventArgs e) => TelemetryView.Toggle();
@@ -83,13 +82,6 @@ public partial class MainWindow
         state.Settings.StartStopButton = null;
         state.Settings.Save();
         ApplyStartStop();
-    }
-
-    private void AnnounceCheck_Changed(object sender, RoutedEventArgs e)
-    {
-        if (initializing) return;
-        state.Settings.AnnounceToggle = AnnounceCheck.IsChecked == true;
-        state.Settings.Save();
     }
 
     /// <summary>While waiting for the start/stop key, the next key (with any modifiers) becomes it. Esc cancels.</summary>

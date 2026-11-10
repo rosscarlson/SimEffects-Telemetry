@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "SimEffects Telemetry for NFSU2",
+  "version": "0.1.1",
+  "description": "Lets SimEffects Telemetry read Need for Speed: Underground 2 on nfsu2.xyz for telemetry and wheel force feedback. Read-only: it never changes the game or what the page sends.",
+  "minimum_chrome_version": "116",
+  "background": { "service_worker": "bridge.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://nfsu2.xyz/*"],
+      "js": ["page.js"],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": ["https://nfsu2.xyz/*"],
+      "js": ["relay.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}

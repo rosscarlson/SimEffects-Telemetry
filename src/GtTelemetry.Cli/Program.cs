@@ -47,6 +47,7 @@ internal static class Program
                 "camera" => Camera(),
                 "record" => Record(rest).GetAwaiter().GetResult(),
                 "selftest" => SelfTest.RunAsync().GetAwaiter().GetResult(),
+                "nfsu2" => Nfsu2Cli.Run(rest),
                 _ => Help(),
             };
         }
@@ -86,6 +87,7 @@ internal static class Program
               record <session> [--range 0xSTART-0xEND|car] [--hz 30] [--no-voice]
                                                     Record a region continuously while the session's steps are spoken
               camera                                Current camera view, seat copies and FOV (read only)
+              nfsu2 ...                             NFSU2 on nfsu2.xyz through the Chrome extension (gtt nfsu2 for help)
 
             Options: --slot N (PINE slot, default 28011)
             """);
@@ -496,7 +498,7 @@ internal static class Program
 
     // ---- arg helpers ----
 
-    private static string? TakeOption(List<string> a, string name)
+    internal static string? TakeOption(List<string> a, string name)
     {
         int i = a.FindIndex(x => x.Equals(name, StringComparison.OrdinalIgnoreCase));
         if (i < 0 || i + 1 >= a.Count) return null;

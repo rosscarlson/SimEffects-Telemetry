@@ -11,3 +11,6 @@ tools/scratch/
 AzimuthSpan/build/
 AzimuthSpan/out/
 probes/
+
+# Python bytecode
+__pycache__/

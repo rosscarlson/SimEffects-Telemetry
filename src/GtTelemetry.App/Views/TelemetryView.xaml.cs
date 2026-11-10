@@ -9,12 +9,13 @@ using GtTelemetry.App.Azimuth;
 using GtTelemetry.Core.Adapters;
 using GtTelemetry.Core.Azimuth;
 using GtTelemetry.Core.Memory;
+using GtTelemetry.Core.Nfsu2;
 using GtTelemetry.Core.Telemetry;
 
 namespace GtTelemetry.App.Views;
 
-/// <summary>Streams the game's telemetry as Forza Data Out and shows what's being sent. The Gran Turismo games go
-/// through <see cref="TelemetryStreamer"/>; Forza Horizon 2 and 3 through Azimuth Telemetry's
+/// <summary>Streams the game's telemetry as Forza Data Out and shows what's being sent. The Gran Turismo games and NFSU2
+/// go through <see cref="TelemetryStreamer"/>; Forza Horizon 2 and 3 through Azimuth Telemetry's
 /// <see cref="TelemetryEngine"/>, which finds the player's car itself. Same settings and readout for both.</summary>
 public partial class TelemetryView : UserControl, IAppView
 {
@@ -25,10 +26,12 @@ public partial class TelemetryView : UserControl, IAppView
         private Pcsx2Connection? current;
         private Gt4SpecIITelemetry? gt4;
         private Ps3GtTelemetry? ps3;
+        private Nfsu2Reader? nfsu2;
 
         public TelemetryFrame Read()
         {
             if (state.UsesAzimuth) return TelemetryFrame.NotDriving;
+            if (state.UsesBrowser) return (nfsu2 ??= new Nfsu2Reader(state.Browser)).Read();
             if (state.UsesRpcs3)
             {
                 var layouts = Ps3CarLayout.ForGame(state.Adapter.Id);

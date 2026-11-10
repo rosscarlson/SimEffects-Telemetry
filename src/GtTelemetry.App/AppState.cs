@@ -6,6 +6,7 @@ using GtTelemetry.Core;
 using GtTelemetry.Core.Adapters;
 using GtTelemetry.Core.Addresses;
 using GtTelemetry.Core.Azimuth;
+using GtTelemetry.Core.Browser;
 using GtTelemetry.Core.Memory;
 using GtTelemetry.Core.Scanning;
 using GtTelemetry.Core.Speech;
@@ -85,8 +86,8 @@ public sealed class WatchItem : Observable, Views.ILiveRow
 }
 
 /// <summary>
-/// Everything the views share: settings, the emulator connection (PCSX2 or RPCS3, by adapter), the voice, the watch
-/// list and the address map.
+/// Everything the views share: settings, the emulator connection (PCSX2, RPCS3 or the browser bridge, by adapter), the
+/// voice, the watch list and the address map.
 /// Lives on the UI thread; memory I/O is pushed to the thread pool by callers.
 /// </summary>
 public sealed class AppState : Observable
@@ -100,6 +101,7 @@ public sealed class AppState : Observable
     private AzimuthStatus azimuth = AzimuthStatus.NotRunning;
     private GameInfo? game;
     private GameAdapter adapter;
+    private readonly Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
 
     public AppState(AppSettings settings)
     {
@@ -113,6 +115,10 @@ public sealed class AppState : Observable
             catch (FormatException) { }
         }
         LoadAddressBook();
+
+        Browser = new BrowserMemorySource(Bridge);
+        Bridge.StateChanged += () => dispatcher.BeginInvoke(BrowserChanged);
+        StartBridge();
 
         reconnectTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         reconnectTimer.Tick += async (_, _) => await MaintainConnectionAsync();
@@ -133,10 +139,20 @@ public sealed class AppState : Observable
     /// this only tracks whether azimuth.exe runs and which game.</summary>
     public bool UsesAzimuth => Adapter.Source == MemorySourceKind.Azimuth;
 
+    /// <summary>The Chrome extension's connection (NFSU2 on nfsu2.xyz). Listens while the app runs, so the game is
+    /// recognised when its page connects.</summary>
+    public BrowserBridge Bridge { get; } = new();
+
+    /// <summary>The browser game's memory through <see cref="Bridge"/>. Read-only.</summary>
+    public BrowserMemorySource Browser { get; }
+
+    /// <summary>The selected game runs in Chrome (NFSU2 on nfsu2.xyz).</summary>
+    public bool UsesBrowser => Adapter.Source == MemorySourceKind.Browser;
+
     /// <summary>azimuth.exe and its game, as of the last connection check.</summary>
     public AzimuthStatus Azimuth { get => azimuth; private set => Set(ref azimuth, value); }
 
-    public string EmulatorName => UsesAzimuth ? "Azimuth" : UsesRpcs3 ? "RPCS3" : "PCSX2";
+    public string EmulatorName => UsesAzimuth ? "Azimuth" : UsesRpcs3 ? "RPCS3" : UsesBrowser ? "nfsu2.xyz" : "PCSX2";
 
     public SpeechAnnouncer Voice { get; }
 
@@ -163,7 +179,7 @@ public sealed class AppState : Observable
     /// <summary>The selected adapter can talk to a running game in this build.</summary>
     public bool AdapterUsable => Adapter.SupportOf(Feature.MemoryAccess) == Support.Available;
 
-    public bool IsConnected => UsesAzimuth ? Azimuth.Game != null : UsesRpcs3 ? Rpcs3.IsConnected : Connection.IsConnected;
+    public bool IsConnected => UsesAzimuth ? Azimuth.Game != null : UsesRpcs3 ? Rpcs3.IsConnected : UsesBrowser ? Browser.IsConnected : Connection.IsConnected;
 
     public bool Connecting { get => connecting; private set => Set(ref connecting, value); }
 
@@ -198,6 +214,11 @@ public sealed class AppState : Observable
                 Azimuth = await Task.Run(AzimuthStatus.Check);
                 return;
             }
+            if (UsesBrowser)
+            {
+                StartBridge();
+                return;
+            }
             if (UsesRpcs3)
             {
                 await Task.Run(TryConnectRpcs3);
@@ -229,6 +250,7 @@ public sealed class AppState : Observable
         Settings.Save();
         Connection.Disconnect();
         Rpcs3.Disconnect();
+        if (UsesBrowser) Bridge.Stop();
         Game = null;
         UpdateConnectionText();
     }
@@ -240,7 +262,8 @@ public sealed class AppState : Observable
         var az = await Task.Run(AzimuthStatus.Check);
         Azimuth = az;
         if (SwitchEmulator(az) || !AdapterUsable) return;
-        if (UsesAzimuth)
+        if (!Bridge.IsListening && (Settings.AutoConnect || !UsesBrowser)) StartBridge();
+        if (UsesAzimuth || UsesBrowser)
         {
             UpdateConnectionText();
             return;
@@ -278,14 +301,33 @@ public sealed class AppState : Observable
         catch (MemorySourceException ex) { rpcs3Error = ex.Message; }
     }
 
+    private void StartBridge()
+    {
+        try { Bridge.Start(); }
+        catch (BrowserBridgeException) { /* the reason is on Bridge.ListenError */ }
+    }
+
+    /// <summary>The extension connected, said something new, or went away: follow it to NFSU2 when the game's page holds
+    /// its memory and the selected game isn't running.</summary>
+    private void BrowserChanged()
+    {
+        if (Bridge.HasMemory && !UsesBrowser && !IsConnected && AdapterCatalog.ForGameId("nfsu2.xyz") is { } web)
+        {
+            Adapter = web;
+            return;
+        }
+        if (UsesBrowser) UpdateConnectionText();
+    }
+
     private void RefreshRpcs3Game()
     {
         var (title, id) = Rpcs3.IsConnected ? Rpcs3.Game() : (null, null);
         Game = id == null ? null : new GameInfo(title, id, null, null, "RPCS3", EmulatorStatus.Running);
     }
 
-    /// <summary>Follows the emulator that's running a known game: FH2 or FH3 in Azimuth, GT5 or GT6 in RPCS3, or
-    /// GT4 in PCSX2, when the selected game's emulator isn't running it. Returns true if the adapter changed.</summary>
+    /// <summary>Follows the emulator that's running a known game: FH2 or FH3 in Azimuth, GT5 or GT6 in RPCS3, GT4 in
+    /// PCSX2, or NFSU2 in Chrome, when the selected game's emulator isn't running it. Returns true if the adapter
+    /// changed.</summary>
     private bool SwitchEmulator(AzimuthStatus az)
     {
         if (az.Game is { } fh && AdapterCatalog.ForGameId(fh.Id) is { } forza && forza != Adapter
@@ -294,9 +336,14 @@ public sealed class AppState : Observable
             Adapter = forza;
             return true;
         }
-        if (UsesAzimuth)
+        if (Bridge.HasMemory && !UsesBrowser && !IsConnected && AdapterCatalog.ForGameId("nfsu2.xyz") is { } web)
         {
-            if (az.Running) return false;
+            Adapter = web;
+            return true;
+        }
+        if (UsesAzimuth || UsesBrowser)
+        {
+            if (UsesAzimuth ? az.Running : Bridge.IsPageConnected) return false;
             if (AdapterCatalog.ForGameId(Rpcs3ProcessMemory.RunningGameId()) is { } running && running.Source == MemorySourceKind.Rpcs3Process)
             {
                 Adapter = running;
@@ -334,6 +381,30 @@ public sealed class AppState : Observable
 
     private void UpdateConnectionText()
     {
+        if (UsesBrowser)
+        {
+            var b = Bridge;
+            var page = b.State;
+            bool mem = b.HasMemory;
+            ConnectionSummary = mem ? "Connected" : b.IsPageConnected ? "Page open" : "Not connected";
+            var browserLines = new List<string>
+            {
+                b.IsListening ? $"Extension bridge: listening on 127.0.0.1:{b.Port}" : "Extension bridge: off",
+            };
+            if (b.IsPageConnected)
+            {
+                browserLines.Add($"SimEffects extension {page.ExtensionVersion} on {(Uri.TryCreate(page.Page, UriKind.Absolute, out var u) ? u.Host : page.Page)}");
+                browserLines.Add(mem ? $"Game memory: {page.MemoryBytes / (1024 * 1024)} MB" : "Game memory: not yet");
+            }
+            ConnectionDetail = string.Join("\n", browserLines);
+            ConnectionError = !b.IsListening ? (Settings.AutoConnect ? b.ListenError : null)
+                : !b.IsPageConnected ? "Open nfsu2.xyz in Chrome with the SimEffects Telemetry extension turned on."
+                : page.Protocol != BrowserBridge.Protocol ? $"The SimEffects extension speaks a different version ({page.Protocol}) from this app ({BrowserBridge.Protocol}). Load the extension that came with this app."
+                : !mem ? "The page is open but the game hasn't started. Press Play."
+                : null;
+            Raise(nameof(IsConnected));
+            return;
+        }
         if (UsesAzimuth)
         {
             var az = Azimuth;

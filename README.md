@@ -1,8 +1,9 @@
 # SimEffects Telemetry
 
 Real-time telemetry, ultrawide/triple-screen rendering and live FOV/seat adjustment for emulated racing games:
-**Gran Turismo 4 Spec II** (PCSX2), **Gran Turismo 5 and 6** (RPCS3), and **Forza Horizon 2 and 3** (Azimuth). The game
-is picked up automatically from whichever emulator is running it. See [REQUESTS.md](REQUESTS.md) for the brief.
+**Gran Turismo 4 Spec II** (PCSX2), **Gran Turismo 5 and 6** (RPCS3), **Forza Horizon 2 and 3** (Azimuth), and
+**Need for Speed: Underground 2** (in Chrome on [nfsu2.xyz](https://nfsu2.xyz)). The game is picked up automatically from
+whichever emulator or page is running it. See [REQUESTS.md](REQUESTS.md) for the brief.
 
 ## Status
 
@@ -12,6 +13,7 @@ is picked up automatically from whichever emulator is running it. See [REQUESTS.
 | GT5 (RPCS3) | yes | not yet | 16:9, 21:9 and 32:9 (the game's Profile card) |
 | GT6 (RPCS3) | yes | not yet | 16:9, 21:9 and 32:9 (the game's Profile card) |
 | FH2, FH3 (Azimuth) | yes | FOV and seat | any render size (Render Aspect Ratio) |
+| NFSU2 (nfsu2.xyz in Chrome) | yes, plus the game's wheel force feedback | no | no |
 
 GT6 telemetry works on 1.00 and 1.05. RPCS3 advises not updating GT6 past 1.05, and each game update moves the data, so
 newer versions aren't supported. GT5 telemetry works on 2.11 (and the earlier version it was first mapped on).
@@ -49,6 +51,17 @@ For Forza Horizon 2 and 3 on Azimuth (merged in from Azimuth Telemetry, which it
 
 How the Forza fields were found: [docs/azimuth/FINDINGS.md](docs/azimuth/FINDINGS.md). The first run carries Azimuth
 Telemetry's settings over (folder, render size, camera changes, start/stop hotkey).
+
+For Need for Speed: Underground 2 on [nfsu2.xyz](https://nfsu2.xyz) ("Underground 2 Revived" by th0mk, in Chrome):
+
+| Feature | What it does |
+|---|---|
+| Extension | `extension/nfsu2` (load it unpacked in `chrome://extensions` with Developer mode on). It lets the app read the game's memory over `ws://127.0.0.1:28020` and tells the game the wheel can do force feedback. It never writes to the game and never touches the page's network traffic, so it's safe on the public servers |
+| Telemetry | RPM, speed, pedals, steering, gear and body motion at 60 Hz. Pausing sends "not driving" |
+| Force feedback | The game's own DirectInput wheel effects (steering force, vibrations, centring spring, damper) played one for one on the wheel picked on the Force feedback card, with an overall strength up to 150% and a strength for each kind. Stops when the game pauses or the page closes. Chrome still reads the wheel for steering |
+
+How it was found: [docs/nfsu2/FINDINGS.md](docs/nfsu2/FINDINGS.md). `gtt nfsu2 watch` and `gtt nfsu2 effects` print what the
+app reads.
 
 The address-finding tools are in the app with `--dev`, and in the CLI:
 

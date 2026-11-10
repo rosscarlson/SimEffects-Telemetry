@@ -1,0 +1,52 @@
+{
+  "game": "Need for Speed: Underground 2",
+  "entries": [
+    {
+      "name": "game_flow",
+      "address": "0x008654A4",
+      "type": "u32",
+      "status": "confirmed",
+      "notes": "TheGameFlowManager's state: 3 front end, 4/5 loading, 6 in the world. From th0mk/nfsu2-web runtime/game.h (MIT).",
+      "source": "live check on nfsu2.xyz 2026-11-09",
+      "updated": "2026-11-09T00:00:00-05:00"
+    },
+    {
+      "name": "world_step",
+      "address": "0x00865154",
+      "type": "f32",
+      "status": "confirmed",
+      "units": "s",
+      "notes": "This frame's world step: 0.0083 at 120 fps, 0 while the world stands (paused, a menu over the race). From th0mk/nfsu2-web runtime/game.h (MIT).",
+      "source": "live check on nfsu2.xyz 2026-11-09",
+      "updated": "2026-11-09T00:00:00-05:00"
+    },
+    {
+      "name": "world_timer",
+      "address": "0x0086518C",
+      "type": "u32",
+      "status": "confirmed",
+      "units": "1/4000 s",
+      "notes": "The race clock, a new value each world step. From th0mk/nfsu2-web runtime/game.h (MIT).",
+      "source": "live check on nfsu2.xyz 2026-11-09",
+      "updated": "2026-11-09T00:00:00-05:00"
+    },
+    {
+      "name": "player1",
+      "address": "0x00D00000",
+      "type": "u32",
+      "status": "confirmed",
+      "notes": "Player 1 (Player*); [player + 4] is its car. A car: +0x30 its input block, +0x60 position (f32 x3, world, Z up), +0x70 velocity (f32 x3, world, m/s), +0x80 acceleration (f32 x3, world, m/s2, gravity excluded; checked live), +0x90 forward, +0xA0 left, +0xB0 up (unit rows), +0x110 spin (f32 x3, world, rad/s), +0x42C forward speed (m/s), +0x430 speed (m/s), +0x434 gear (s32: 0 reverse, 1 neutral, 2 first), +0x440 rpm (f32). Its input block: +0x1E0 steer (s16: +-8192 at full lock with a wheel, + left; checked live), +0x20C throttle, +0x210 handbrake, +0x214 brake (f32 0-1). From th0mk/nfsu2-web runtime/game.h, racecars.c (MIT).",
+      "source": "live check on nfsu2.xyz 2026-11-09",
+      "updated": "2026-11-09T00:00:00-05:00"
+    },
+    {
+      "name": "ff_manager",
+      "address": "0x00870760",
+      "type": "u32",
+      "status": "confirmed",
+      "notes": "The game's force feedback manager. Per device slot s (0 the wheel): +0x2BA0 + 12s spring offset, coefficient, saturation (s32 x3); +0x2BB8 + 8s constant force magnitude (s32, +-10000); +0x2BC8 + 4s damper coefficient (s32). Found from the game's code (0x5C9150, 0x5C9380, 0x5C9590). docs/nfsu2/FINDINGS.md.",
+      "source": "Phase 0 on nfsu2.xyz 2026-11-09",
+      "updated": "2026-11-09T00:00:00-05:00"
+    }
+  ]
+}

@@ -90,6 +90,7 @@ public partial class MainWindow : Window
     {
         ThemeManager.ApplyTitleBar(this);
         SetUpStartStop();
+        SetUpFfb();
     }
 
     private void Window_Activated(object? sender, EventArgs e) => TelemetryView.RefreshScreens();
@@ -99,10 +100,12 @@ public partial class MainWindow : Window
         foreach (var view in views) view.Shutdown();
         ShutdownCamera();
         ShutdownStartStop();
+        ShutdownFfb();
         state.SaveWatch();
         state.Settings.Save();
         state.Connection.Dispose();
         state.Rpcs3.Dispose();
+        state.Bridge.Dispose();
         state.Voice.Dispose();
     }
 
@@ -170,9 +173,12 @@ public partial class MainWindow : Window
         // The display card is hidden for games without display patches.
         // Azimuth's render size is on the Telemetry tab instead (Render Aspect Ratio).
         ProfileCard.Visibility = a.SupportOf(Feature.DisplayPatches) == Support.Available && (a.Source == MemorySourceKind.Pcsx2Pine || a == AdapterCatalog.Gt5 || a == AdapterCatalog.Gt6) ? Visibility.Visible : Visibility.Collapsed;
-        // The camera bindings are shared by every game, so the card stays; it's greyed out for games without camera control.
+        // The camera bindings are shared by every game, so the card stays; it's greyed out for games where camera control
+        // is planned, and hidden for games that won't have it.
         CameraCard.IsEnabled = a.SupportOf(Feature.CameraControl) == Support.Available;
         CameraCard.Opacity = CameraCard.IsEnabled ? 1 : 0.5;
+        CameraCard.Visibility = a.Features.Any(f => f.Feature == Feature.CameraControl && f.Support == Support.Unavailable) ? Visibility.Collapsed : Visibility.Visible;
+        FfbCard.Visibility = state.UsesBrowser ? Visibility.Visible : Visibility.Collapsed;
         // The tab bar: Controls (Azimuth's wheel bindings) for the Azimuth games, the address tools in developer mode.
         TabControls.Visibility = state.UsesAzimuth ? Visibility.Visible : Visibility.Collapsed;
         NavBar.Visibility = developer || state.UsesAzimuth ? Visibility.Visible : Visibility.Collapsed;
@@ -180,6 +186,7 @@ public partial class MainWindow : Window
         if (camera != null) CameraAdapterChanged();
         foreach (var view in views) view.AdapterChanged();
         RefreshDisplay();
+        if (!initializing) ShowHint();
     }
 
     // ---- game profile: display ----
@@ -464,12 +471,12 @@ public partial class MainWindow : Window
         ConnDot.Fill = (Brush)FindResource(connected ? "SuccessBrush" : "ControlBorderStrongBrush");
         ConnectButton.Content = state.Connecting ? "Connecting…" : connected ? "Disconnect" : "Connect";
         ConnectButton.IsEnabled = usable && !state.Connecting;
-        SlotBox.IsEnabled = FastBox.IsEnabled = usable && !state.UsesRpcs3 && !state.UsesAzimuth;
+        SlotBox.IsEnabled = FastBox.IsEnabled = usable && state.Adapter.Source == MemorySourceKind.Pcsx2Pine;
         foreach (var view in views) view.ConnectionChanged();
         RefreshGameError();
         // PCSX2 or RPCS3 may have just started, so its folder can be found now.
         if ((IsRpcs3Game ? rpcs3Folder : pcsx2Data) == null && !initializing) RefreshDisplay();
-        if (StatusText.Text is "Ready." or "Waiting for PCSX2…" or "Waiting for RPCS3…" or "Waiting for Azimuth…" or "")
+        if (StatusText.Text is "Ready." or "Waiting for PCSX2…" or "Waiting for RPCS3…" or "Waiting for Azimuth…" or "Waiting for nfsu2.xyz…" or "")
             ShowStatus(connected ? "Ready." : $"Waiting for {state.EmulatorName}…", StatusKind.Hint);
     }
 

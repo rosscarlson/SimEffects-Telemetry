@@ -93,9 +93,6 @@ public sealed class AppSettings
 
     public string? StartStopButton { get; set; }
 
-    /// <summary>Say "telemetry on/off" when the start/stop hotkey is used.</summary>
-    public bool AnnounceToggle { get; set; } = true;
-
     /// <summary>Where azimuth.exe is, when this app isn't next to it.</summary>
     public string? AzimuthFolder { get; set; }
 
@@ -103,6 +100,24 @@ public sealed class AppSettings
     public int? AspectWidth { get; set; }
 
     public int? AspectHeight { get; set; }
+
+    /// <summary>NFSU2: play the game's own wheel effects on the wheel.</summary>
+    public bool FfbEnabled { get; set; } = true;
+
+    /// <summary>NFSU2: the wheel's DirectInput instance GUID; empty means the first wheel with force feedback.</summary>
+    public string? FfbWheel { get; set; }
+
+    /// <summary>NFSU2: overall force feedback strength, percent.</summary>
+    public int FfbStrength { get; set; } = 70;
+
+    /// <summary>NFSU2: each kind of effect's strength, percent: steering force, vibrations, centring spring, damper.</summary>
+    public int FfbConstant { get; set; } = 100;
+
+    public int FfbVibration { get; set; } = 100;
+
+    public int FfbSpring { get; set; } = 100;
+
+    public int FfbDamper { get; set; } = 100;
 
     /// <summary>Azimuth Telemetry's settings were carried over (once).</summary>
     public bool ImportedAzimuthTelemetry { get; set; }
@@ -157,7 +172,6 @@ public sealed class AppSettings
             AzimuthFolder ??= Str("AzimuthFolder");
             AspectWidth ??= Int("AspectWidth");
             AspectHeight ??= Int("AspectHeight");
-            if (r.TryGetProperty("AnnounceToggle", out var say) && say.ValueKind == JsonValueKind.False) AnnounceToggle = false;
             if (r.TryGetProperty("CameraAdjust", out var cam))
                 foreach (var e in cam.EnumerateObject())
                     if (e.Value.Deserialize<CameraAdjust>(Json) is { IsZero: false } a) AzimuthCamera.TryAdd(e.Name, a);

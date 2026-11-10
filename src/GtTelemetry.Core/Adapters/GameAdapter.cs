@@ -1,8 +1,8 @@
 namespace GtTelemetry.Core.Adapters;
 
-public enum MemorySourceKind { Pcsx2Pine, Rpcs3Pine, Rpcs3Process, Azimuth }
+public enum MemorySourceKind { Pcsx2Pine, Rpcs3Pine, Rpcs3Process, Azimuth, Browser }
 
-public enum Feature { MemoryAccess, Telemetry, CameraControl, DisplayPatches, PerCarProfiles }
+public enum Feature { MemoryAccess, Telemetry, ForceFeedback, CameraControl, DisplayPatches, PerCarProfiles }
 
 public enum Support
 {
@@ -30,7 +30,8 @@ public sealed class GameAdapter
 
     public required MemorySourceKind Source { get; init; }
 
-    /// <summary>Disc serials / title IDs this adapter recognizes (as reported by PINE or RPCS3), or the Azimuth game's id.</summary>
+    /// <summary>Disc serials / title IDs this adapter recognizes (as reported by PINE or RPCS3), the Azimuth game's id, or
+    /// the browser game's site.</summary>
     public IReadOnlyList<string> GameIds { get; init; } = [];
 
     /// <summary>Folder under data/ holding the address map.</summary>
@@ -48,6 +49,7 @@ public sealed class GameAdapter
     {
         Feature.MemoryAccess => "Memory access & scanning",
         Feature.Telemetry => "Telemetry output (UDP)",
+        Feature.ForceFeedback => "Force feedback",
         Feature.CameraControl => "Live FOV & seat position",
         Feature.DisplayPatches => "Ultrawide & triple screens",
         Feature.PerCarProfiles => "Per-car profiles",
@@ -60,6 +62,7 @@ public sealed class GameAdapter
         MemorySourceKind.Rpcs3Pine => "RPCS3 · PINE",
         MemorySourceKind.Rpcs3Process => "RPCS3 · process memory",
         MemorySourceKind.Azimuth => "Azimuth · process memory",
+        MemorySourceKind.Browser => "Chrome · SimEffects extension",
         _ => k.ToString(),
     };
 }
@@ -132,12 +135,33 @@ public static class AdapterCatalog
         [
             new(Feature.MemoryAccess, Support.Available, "Read straight from azimuth.exe; the game is recognised when it runs"),
             new(Feature.Telemetry, Support.Available, "Forza Data Out (Horizon or Dash format) over UDP, e.g. to SimHub"),
+            new(Feature.ForceFeedback, Support.Available, "Azimuth's own wheel force feedback, with its strength on the Controls tab"),
             new(Feature.CameraControl, Support.Available, "FOV in every driving view, and the seat in the in-car views"),
             new(Feature.DisplayPatches, Support.Available, "Any render size, e.g. 10240 × 1440 for triple screens (Render Aspect Ratio)"),
         ],
     };
 
-    public static readonly IReadOnlyList<GameAdapter> All = [Gt4SpecII, Gt5, Gt6, ForzaHorizon];
+    /// <summary>Need for Speed: Underground 2 in Chrome on nfsu2.xyz (Underground 2 Revived), read through the SimEffects
+    /// extension (extension/nfsu2). Played on public servers, so read-only: the app never writes to the game.</summary>
+    public static readonly GameAdapter Nfsu2Web = new()
+    {
+        Id = "nfsu2-web",
+        Name = "Need for Speed: Underground 2",
+        Platform = "Browser (nfsu2.xyz)",
+        Source = MemorySourceKind.Browser,
+        GameIds = ["nfsu2.xyz"],
+        DataFolder = "nfsu2-web",
+        Features =
+        [
+            new(Feature.MemoryAccess, Support.Available, "Read through the SimEffects extension in Chrome; read-only, so it's safe on the public servers"),
+            new(Feature.Telemetry, Support.Available, "Forza Data Out (Horizon or Dash format) over UDP, e.g. to SimHub"),
+            new(Feature.ForceFeedback, Support.Available, "The game's own wheel effects, played on your wheel"),
+            new(Feature.CameraControl, Support.Unavailable, ""),
+            new(Feature.DisplayPatches, Support.Unavailable, ""),
+        ],
+    };
+
+    public static readonly IReadOnlyList<GameAdapter> All = [Gt4SpecII, Gt5, Gt6, ForzaHorizon, Nfsu2Web];
 
     /// <summary>The saved game, by id; "fh2" and "fh3" were separate entries before.</summary>
     public static GameAdapter? ForId(string? id) => id is "fh2" or "fh3" ? ForzaHorizon : All.FirstOrDefault(a => a.Id == id);

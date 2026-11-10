@@ -63,6 +63,65 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Force feedback (NFSU2: the game's own wheel effects) -->
+                <Border x:Name="FfbCard" Style="{StaticResource Card}" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Force feedback" Style="{StaticResource CardHeader}"/>
+                        <CheckBox x:Name="FfbEnabledBox" Content="Play the game's wheel effects" Checked="FfbEnabled_Changed" Unchecked="FfbEnabled_Changed"
+                                  ToolTip="The app holds the wheel's force feedback while the game runs, so other programs can't play effects on it then."/>
+                        <ComboBox x:Name="FfbWheelBox" Margin="0,10,0,0" DisplayMemberPath="Name" SelectionChanged="FfbWheelBox_SelectionChanged"
+                                  DropDownOpened="FfbWheelBox_DropDownOpened"/>
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" MinWidth="48"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Strength" VerticalAlignment="Center" ToolTip="All of the game's effects together. Over 100% is stronger than the game makes them."/>
+                            <Slider x:Name="FfbStrengthSlider" Grid.Row="0" Grid.Column="1" Margin="10,4" Minimum="0" Maximum="150" TickFrequency="5"
+                                    IsSnapToTickEnabled="True" ValueChanged="FfbSlider_ValueChanged" ToolTip="All of the game's effects together."/>
+                            <TextBlock x:Name="FfbStrengthText" Grid.Row="0" Grid.Column="2" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Text="Steering force" VerticalAlignment="Center" ToolTip="The force the game puts on the steering as the car turns and grips."/>
+                            <Slider x:Name="FfbConstantSlider" Grid.Row="1" Grid.Column="1" Margin="10,4" Minimum="0" Maximum="100" TickFrequency="5"
+                                    IsSnapToTickEnabled="True" ValueChanged="FfbSlider_ValueChanged" ToolTip="The force the game puts on the steering as the car turns and grips."/>
+                            <TextBlock x:Name="FfbConstantText" Grid.Row="1" Grid.Column="2" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Text="Vibrations" VerticalAlignment="Center" ToolTip="Road, engine and impact vibrations."/>
+                            <Slider x:Name="FfbVibrationSlider" Grid.Row="2" Grid.Column="1" Margin="10,4" Minimum="0" Maximum="100" TickFrequency="5"
+                                    IsSnapToTickEnabled="True" ValueChanged="FfbSlider_ValueChanged" ToolTip="Road, engine and impact vibrations."/>
+                            <TextBlock x:Name="FfbVibrationText" Grid.Row="2" Grid.Column="2" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Text="Centring" VerticalAlignment="Center" ToolTip="The spring that centres the wheel (when stopped)."/>
+                            <Slider x:Name="FfbSpringSlider" Grid.Row="3" Grid.Column="1" Margin="10,4" Minimum="0" Maximum="100" TickFrequency="5"
+                                    IsSnapToTickEnabled="True" ValueChanged="FfbSlider_ValueChanged" ToolTip="The spring that centres the wheel (when stopped)."/>
+                            <TextBlock x:Name="FfbSpringText" Grid.Row="3" Grid.Column="2" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="4" Text="Damper" VerticalAlignment="Center" ToolTip="The weight the game adds to the wheel."/>
+                            <Slider x:Name="FfbDamperSlider" Grid.Row="4" Grid.Column="1" Margin="10,4" Minimum="0" Maximum="100" TickFrequency="5"
+                                    IsSnapToTickEnabled="True" ValueChanged="FfbSlider_ValueChanged" ToolTip="The weight the game adds to the wheel."/>
+                            <TextBlock x:Name="FfbDamperText" Grid.Row="4" Grid.Column="2" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock x:Name="FfbStatus" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                        <ItemsControl x:Name="FfbList" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Mark}" FontFamily="{StaticResource IconFont}" FontSize="10" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource AccentBrush}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12" Opacity="{Binding Opacity}"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Detail}" FontSize="12" Style="{StaticResource SecondaryText}" TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
                 <!-- Game profile -->
                 <Border x:Name="ProfileCard" Style="{StaticResource Card}">
                     <StackPanel>
@@ -111,8 +170,6 @@
                         </StackPanel>
                         <TextBlock x:Name="HotkeyWarning" Style="{StaticResource SecondaryText}" Foreground="{DynamicResource ErrorTextBrush}"
                                    Margin="0,8,0,0" Visibility="Collapsed" TextWrapping="Wrap"/>
-                        <CheckBox x:Name="AnnounceCheck" Content="Say “telemetry on/off” when it's used" Margin="0,12,0,0"
-                                  Checked="AnnounceCheck_Changed" Unchecked="AnnounceCheck_Changed"/>
                     </StackPanel>
                 </Border>
 
