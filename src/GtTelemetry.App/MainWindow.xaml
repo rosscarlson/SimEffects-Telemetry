@@ -119,6 +119,8 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <Button Content="Set up the Chrome extension" HorizontalAlignment="Left" Margin="0,10,0,0" Click="ChromeExtension_Click"
+                                ToolTip="The game needs the SimEffects extension in Chrome. This opens Chrome's extensions page and copies the folder to load."/>
                     </StackPanel>
                 </Border>
 

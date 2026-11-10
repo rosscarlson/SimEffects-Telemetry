@@ -19,6 +19,7 @@ public partial class MainWindow
     private void SetUpFfb()
     {
         ffbLoading = true;
+        ChromeExtension.Write();   // keeps a loaded extension up to date with the app
         var s = state.Settings;
         FfbEnabledBox.IsChecked = s.FfbEnabled;
         FfbStrengthSlider.Value = s.FfbStrength;
@@ -33,6 +34,26 @@ public partial class MainWindow
         ffbTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         ffbTimer.Tick += (_, _) => ShowFfb();
         ffbTimer.Start();
+    }
+
+    private void ChromeExtension_Click(object sender, RoutedEventArgs e)
+    {
+        if (!ChromeExtension.Write())
+        {
+            MessageBox.Show(this, $"Couldn't write the extension to {ChromeExtension.Folder}.", "Chrome extension", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+        try { Clipboard.SetText(ChromeExtension.Folder); } catch { }
+        bool chrome = ChromeExtension.OpenChrome();
+        MessageBox.Show(this,
+            (chrome ? "Chrome is open on its extensions page.\n\n" : "Open Chrome and go to chrome://extensions.\n\n") +
+            "1. Turn on Developer mode (top right).\n" +
+            "2. Click Load unpacked.\n" +
+            "3. Paste the folder into the address bar (it's on the clipboard) and click Select Folder:\n" +
+            $"    {ChromeExtension.Folder}\n" +
+            "4. Reload nfsu2.xyz.\n\n" +
+            "If it's already there, click its reload arrow instead.",
+            "Chrome extension", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void ShutdownFfb()

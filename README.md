@@ -56,7 +56,7 @@ For Need for Speed: Underground 2 on [nfsu2.xyz](https://nfsu2.xyz) ("Undergroun
 
 | Feature | What it does |
 |---|---|
-| Extension | `extension/nfsu2` (load it unpacked in `chrome://extensions` with Developer mode on). It lets the app read the game's memory over `ws://127.0.0.1:28020` and tells the game the wheel can do force feedback. It never writes to the game and never touches the page's network traffic, so it's safe on the public servers |
+| Extension | Built into the app and written to `Downloads\SimEffects Telemetry Chrome Extension`; **Set up the Chrome extension** on the Force feedback card opens `chrome://extensions` and gives the steps (Developer mode, Load unpacked). Source in `extension/nfsu2`. It lets the app read the game's memory over `ws://127.0.0.1:28020` and tells the game the wheel can do force feedback. It never writes to the game and never touches the page's network traffic, so it's safe on the public servers |
 | Telemetry | RPM, speed, pedals, steering, gear and body motion at 60 Hz. Pausing sends "not driving" |
 | Force feedback | The game's own DirectInput wheel effects (steering force, vibrations, centring spring, damper) played one for one on the wheel picked on the Force feedback card, with an overall strength up to 150% and a strength for each kind. Stops when the game pauses or the page closes. Chrome still reads the wheel for steering |
 
